@@ -1,0 +1,770 @@
+"use client";
+
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Scissors,
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  BarChart3,
+  Settings,
+  Plus,
+  Search,
+  Bell,
+  CheckCircle2,
+  Menu,
+  X,
+  LogOut,
+  Wallet,
+  Receipt,
+  Banknote,
+  Calendar,
+  Eye,
+  Filter,
+  Download,
+  MoreVertical,
+  Check,
+  Printer
+} from "lucide-react";
+
+// ============================================================================
+// TYPES & INITIAL DATA
+// ============================================================================
+
+type PaymentStatus = "Lunas" | "DP" | "Belum Bayar";
+type PaymentMethod = "Cash" | "Transfer Bank" | "E-Wallet" | "-";
+
+interface Transaction {
+  id: string;
+  date: string;
+  orderCode: string;
+  customerName: string;
+  totalAmount: number;
+  paidAmount: number;
+  paymentMethod: PaymentMethod;
+  status: PaymentStatus;
+  notes?: string;
+}
+
+// Data awal dikosongkan
+const INITIAL_TRANSACTIONS: Transaction[] = [];
+
+const STATUS_TABS = ["Semua", "Lunas", "DP", "Belum Bayar"];
+
+const formatRupiah = (angka: number) => {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
+};
+
+// Helper Badge Status
+const getStatusBadge = (status: PaymentStatus) => {
+  switch (status) {
+    case "Lunas":
+      return <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">Lunas</span>;
+    case "DP":
+      return <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-amber-50 text-amber-700 border border-amber-200">Bayar DP</span>;
+    case "Belum Bayar":
+      return <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-rose-50 text-rose-700 border border-rose-200">Belum Bayar</span>;
+  }
+};
+
+// ============================================================================
+// MAIN PAYMENTS COMPONENT
+// ============================================================================
+
+export default function PaymentsPage() {
+  const pathname = "/payments";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // States
+  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("Semua");
+  
+  // Modals State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<Transaction | null>(null);
+
+  // Form State untuk Tambah Transaksi
+  const [formData, setFormData] = useState({
+    orderCode: "",
+    customerName: "",
+    totalAmount: "",
+    paidAmount: "",
+    paymentMethod: "Cash" as PaymentMethod,
+    notes: "",
+  });
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Filter & Search Logic
+  const filteredTransactions = transactions.filter((trx) => {
+    const matchesSearch = 
+      trx.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      trx.orderCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      trx.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "Semua" || trx.status === activeTab;
+    return matchesSearch && matchesTab;
+  });
+
+  // Kalkulasi Statistik
+  const totalPendapatan = transactions.reduce((acc, curr) => acc + curr.paidAmount, 0);
+  const totalPiutang = transactions.reduce((acc, curr) => acc + (curr.totalAmount - curr.paidAmount), 0);
+  const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length;
+
+  // Handler Submit Transaksi Baru
+  const handleSavePayment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.orderCode || !formData.customerName || !formData.totalAmount) {
+      showToast("Harap isi semua bidang wajib!");
+      return;
+    }
+
+    const total = parseFloat(formData.totalAmount) || 0;
+    const paid = parseFloat(formData.paidAmount) || 0;
+    let status: PaymentStatus = "Belum Bayar";
+
+    if (paid >= total && total > 0) {
+      status = "Lunas";
+    } else if (paid > 0) {
+      status = "DP";
+    }
+
+    const newTrx: Transaction = {
+      id: `TRX-${new Date().getFullYear()}-${String(transactions.length + 1).padStart(3, '0')}`,
+      date: new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }),
+      orderCode: formData.orderCode.toUpperCase(),
+      customerName: formData.customerName,
+      totalAmount: total,
+      paidAmount: paid,
+      paymentMethod: formData.paymentMethod,
+      status: status,
+      notes: formData.notes,
+    };
+
+    setTransactions([newTrx, ...transactions]);
+    setIsPaymentModalOpen(false);
+    
+    // Reset Form
+    setFormData({
+      orderCode: "",
+      customerName: "",
+      totalAmount: "",
+      paidAmount: "",
+      paymentMethod: "Cash",
+      notes: "",
+    });
+    
+    showToast("Transaksi pembayaran berhasil dicatat!");
+  };
+
+  // Handler Lunasi Instan
+  const handleLunasi = (id: string) => {
+    setTransactions((prev) =>
+      prev.map((trx) => {
+        if (trx.id === id) {
+          return {
+            ...trx,
+            paidAmount: trx.totalAmount,
+            status: "Lunas",
+            paymentMethod: trx.paymentMethod === "-" ? "Cash" : trx.paymentMethod,
+          };
+        }
+        return trx;
+      })
+    );
+    showToast("Pembayaran berhasil dilunasi!");
+  };
+
+  const navigationMenu = [
+    {
+      group: "MENU UTAMA",
+      items: [
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Pesanan", href: "/orders", icon: Scissors },
+        { name: "Pelanggan", href: "/customers", icon: Users },
+      ],
+    },
+    {
+      group: "KEUANGAN",
+      items: [
+        { name: "Pembayaran", href: "/payments", icon: CreditCard },
+        { name: "Laporan", href: "/reports", icon: BarChart3 },
+      ],
+    },
+    {
+      group: "LAINNYA",
+      items: [
+        { name: "Pengaturan", href: "/settings", icon: Settings },
+      ],
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      
+      {/* Toast Feedback Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className="fixed top-5 right-5 z-50 bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-emerald-700"
+          >
+            <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar Mobile Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar Desktop & Mobile Drawer */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full overflow-y-auto">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-sm">
+                <Scissors className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-xl text-indigo-950 tracking-tight leading-none">JahitFlow</span>
+                <span className="text-xs text-slate-500 font-medium mt-1">Satria Tailor</span>
+              </div>
+            </Link>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 lg:hidden rounded-lg hover:bg-slate-100">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="flex-1 px-4 py-6 space-y-6">
+            {navigationMenu.map((group, groupIdx) => (
+              <div key={groupIdx}>
+                <p className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">{group.group}</p>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all ${
+                          isActive ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 shadow-sm">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">S</div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-slate-900 truncate leading-tight">Satria</p>
+                  <p className="text-xs text-slate-500 font-medium truncate">Pemilik Usaha</p>
+                </div>
+              </div>
+              <button type="button" title="Keluar" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
+        
+        {/* Header Bar */}
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none">
+              <Menu className="w-6 h-6" />
+            </button>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Pembayaran</h1>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium hidden sm:block">Kelola tagihan, DP, dan riwayat transaksi pelunasan.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
+              <Bell className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">S</div>
+              <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Payments Page Content */}
+        <main className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto">
+          
+          {/* Top Stat Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+              <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <Wallet className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase">Uang Diterima</p>
+                <p className="text-2xl font-extrabold text-slate-900">{formatRupiah(totalPendapatan)}</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+              <div className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl">
+                <Banknote className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase">Total Tagihan (Piutang)</p>
+                <p className="text-2xl font-extrabold text-slate-900">{formatRupiah(totalPiutang)}</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+              <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl">
+                <Receipt className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase">Transaksi Lunas</p>
+                <p className="text-2xl font-extrabold text-slate-900">{totalTransaksiLunas} <span className="text-sm text-slate-500 font-semibold">Pesanan</span></p>
+              </div>
+            </div>
+          </div>
+
+          {/* Search, Filter & Actions */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Cari ID, Kode Pesanan, atau Nama..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium text-slate-900 placeholder:text-slate-400 transition-all shadow-sm"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button 
+                onClick={() => showToast("Data diexport!")}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 text-sm font-bold shadow-sm transition-all flex-1 sm:flex-none justify-center"
+              >
+                <Download className="w-4 h-4" /> Export
+              </button>
+              <button 
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition-all flex-1 sm:flex-none justify-center"
+              >
+                <Plus className="w-4 h-4" /> Catat Bayar
+              </button>
+            </div>
+          </div>
+
+          {/* Status Tabs */}
+          <div className="bg-white p-1 rounded-2xl border border-slate-200/80 shadow-sm inline-flex overflow-x-auto w-full hide-scrollbar">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold transition-all flex-1 sm:flex-none ${
+                  activeTab === tab
+                    ? "bg-indigo-50 text-indigo-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-4 px-6">ID Transaksi & Pesanan</th>
+                    <th className="py-4 px-6">Pelanggan</th>
+                    <th className="py-4 px-6">Total Biaya</th>
+                    <th className="py-4 px-6">Telah Dibayar</th>
+                    <th className="py-4 px-6">Sisa Tagihan</th>
+                    <th className="py-4 px-6">Status & Metode</th>
+                    <th className="py-4 px-6 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {filteredTransactions.length > 0 ? (
+                    filteredTransactions.map((trx) => {
+                      const sisaTagihan = trx.totalAmount - trx.paidAmount;
+                      return (
+                        <tr key={trx.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-4 px-6">
+                            <p className="font-extrabold text-indigo-700 text-sm">{trx.id}</p>
+                            <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
+                              <Scissors className="w-3 h-3" /> {trx.orderCode}
+                            </p>
+                          </td>
+                          <td className="py-4 px-6 font-bold text-slate-900">{trx.customerName}</td>
+                          <td className="py-4 px-6 font-semibold text-slate-700">{formatRupiah(trx.totalAmount)}</td>
+                          <td className="py-4 px-6 font-bold text-emerald-600">{formatRupiah(trx.paidAmount)}</td>
+                          <td className="py-4 px-6 font-bold text-rose-600">{sisaTagihan > 0 ? formatRupiah(sisaTagihan) : "-"}</td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col gap-1.5 items-start">
+                              {getStatusBadge(trx.status)}
+                              <span className="text-[10px] text-slate-500 font-semibold">{trx.paymentMethod}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {trx.status !== "Lunas" && (
+                                <button 
+                                  onClick={() => handleLunasi(trx.id)}
+                                  className="px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors"
+                                >
+                                  Lunasi
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => setSelectedReceipt(trx)}
+                                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" 
+                                title="Lihat Kwitansi"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-600 font-medium">
+                        <div className="flex flex-col items-center justify-center">
+                          <Search className="w-10 h-10 text-slate-300 mb-3" />
+                          <p>Data pembayaran masih kosong. Silakan catat pembayaran baru.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="space-y-4 md:hidden">
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.map((trx) => {
+                const sisaTagihan = trx.totalAmount - trx.paidAmount;
+                return (
+                  <div key={trx.id} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div>
+                        <span className="font-extrabold text-indigo-700 text-sm block">{trx.id}</span>
+                        <span className="text-[10px] font-bold text-slate-500">Pesanan: {trx.orderCode}</span>
+                      </div>
+                      {getStatusBadge(trx.status)}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-base">{trx.customerName}</h4>
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Total</p>
+                          <p className="text-sm font-bold text-slate-700">{formatRupiah(trx.totalAmount)}</p>
+                        </div>
+                        <div className="bg-emerald-50 p-2 rounded-xl border border-emerald-100">
+                          <p className="text-[10px] text-emerald-600/70 font-bold uppercase mb-0.5">Dibayar</p>
+                          <p className="text-sm font-bold text-emerald-700">{formatRupiah(trx.paidAmount)}</p>
+                        </div>
+                      </div>
+                      {sisaTagihan > 0 && (
+                        <p className="text-xs font-bold text-rose-600 mt-2 text-right">Sisa: {formatRupiah(sisaTagihan)}</p>
+                      )}
+                    </div>
+                    <div className="pt-3 flex gap-2 border-t border-slate-100">
+                      <button 
+                        onClick={() => setSelectedReceipt(trx)}
+                        className="flex-1 py-2 text-center text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                      >
+                        Kwitansi
+                      </button>
+                      {trx.status !== "Lunas" && (
+                        <button 
+                          onClick={() => handleLunasi(trx.id)}
+                          className="flex-1 py-2 text-center text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
+                        >
+                          Lunasi
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center">
+                <Search className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-600 font-medium">Data pembayaran masih kosong.</p>
+              </div>
+            )}
+          </div>
+
+        </main>
+
+        <footer className="mt-auto border-t border-slate-200/80 bg-white py-6 px-4 sm:px-8 text-center text-xs font-medium text-slate-400">
+          &copy; {new Date().getFullYear()} JahitFlow. Hak Cipta Dilindungi.
+        </footer>
+      </div>
+
+      {/* =====================================================================
+          MODAL: CATAT PEMBAYARAN BARU
+          ===================================================================== */}
+      <AnimatePresence>
+        {isPaymentModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsPaymentModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 flex flex-col"
+            >
+              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500 rounded-xl">
+                    <Banknote className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-lg">Catat Pembayaran</h3>
+                    <p className="text-xs text-slate-400">Input DP atau Pelunasan Pesanan</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsPaymentModalOpen(false)} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSavePayment}>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Kode Pesanan <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: OR004"
+                        value={formData.orderCode}
+                        onChange={(e) => setFormData({ ...formData, orderCode: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold uppercase text-slate-900 placeholder:text-slate-400"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Pelanggan <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Nama Pemesan"
+                        value={formData.customerName}
+                        onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Total Biaya (Rp) <span className="text-red-500">*</span></label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={formData.totalAmount}
+                        onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900 placeholder:text-slate-400"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Dibayar (Rp)</label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={formData.paidAmount}
+                        onChange={(e) => setFormData({ ...formData, paidAmount: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-emerald-700 placeholder:text-emerald-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Metode</label>
+                    <select 
+                      value={formData.paymentMethod}
+                      onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as PaymentMethod })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 bg-white"
+                    >
+                      <option value="Cash">Cash (Tunai)</option>
+                      <option value="Transfer Bank">Transfer Bank</option>
+                      <option value="E-Wallet">E-Wallet</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Catatan Tambahan</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Catatan..."
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium text-slate-900 placeholder:text-slate-400 resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="p-4 flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/50">
+                  <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200">
+                    Batal
+                  </button>
+                  <button 
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
+                  >
+                    Simpan Transaksi
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* =====================================================================
+          MODAL: LIHAT KWITANSI
+          ===================================================================== */}
+      <AnimatePresence>
+        {selectedReceipt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelectedReceipt(null)}
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 flex flex-col"
+            >
+              <div className="p-6 bg-indigo-600 text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-5 h-5" />
+                  <span className="font-bold text-base">Kwitansi Pembayaran</span>
+                </div>
+                <button onClick={() => setSelectedReceipt(null)} className="p-1 text-white/80 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="text-center border-b border-dashed border-slate-200 pb-4">
+                  <h4 className="font-extrabold text-xl text-slate-900">JahitFlow Tailor</h4>
+                  <p className="text-xs text-slate-500">Bukti Pembayaran Resmi</p>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">No. Kwitansi</span>
+                    <span className="font-mono font-bold text-slate-900">{selectedReceipt.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Tanggal</span>
+                    <span className="font-medium text-slate-900">{selectedReceipt.date}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Kode Pesanan</span>
+                    <span className="font-mono font-bold text-indigo-600">{selectedReceipt.orderCode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Nama Pelanggan</span>
+                    <span className="font-bold text-slate-900">{selectedReceipt.customerName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Metode</span>
+                    <span className="font-semibold text-slate-900">{selectedReceipt.paymentMethod}</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-2xl space-y-2 border border-slate-100">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600">Total Biaya</span>
+                    <span className="font-bold text-slate-900">{formatRupiah(selectedReceipt.totalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600">Telah Dibayar</span>
+                    <span className="font-bold text-emerald-600">{formatRupiah(selectedReceipt.paidAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs pt-1 border-t border-slate-200">
+                    <span className="text-slate-600 font-bold">Sisa Tagihan</span>
+                    <span className="font-extrabold text-rose-600">
+                      {selectedReceipt.totalAmount - selectedReceipt.paidAmount > 0 
+                        ? formatRupiah(selectedReceipt.totalAmount - selectedReceipt.paidAmount)
+                        : "LUNAS"}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedReceipt.notes && (
+                  <p className="text-[11px] text-slate-500 italic text-center">"{selectedReceipt.notes}"</p>
+                )}
+              </div>
+
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+                <button 
+                  onClick={() => { setSelectedReceipt(null); showToast("Mencetak kwitansi..."); }}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> Cetak Kwitansi
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
