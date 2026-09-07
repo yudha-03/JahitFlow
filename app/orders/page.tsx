@@ -27,7 +27,8 @@ import {
   Eye,
   FileEdit,
   Trash2,
-  Info
+  Info,
+  Home // <-- DITAMBAHKAN: Import Home icon
 } from "lucide-react";
 
 // ============================================================================
@@ -320,6 +321,28 @@ export default function OrdersPage() {
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Daftar Pesanan</h1>
               <p className="text-xs sm:text-sm text-slate-500 font-medium hidden sm:block">Kelola dan pantau progres pengerjaan jahitan.</p>
+            </div>
+          </div>
+
+          {/* Bagian Kanan Header (Icon Lonceng & Profil User) */}
+          <div className="flex items-center gap-3">
+            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden">Beranda</span>
+            </Link>
+
+            <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+            </button>
+            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">S</div>
+              <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
             </div>
           </div>
         </header>

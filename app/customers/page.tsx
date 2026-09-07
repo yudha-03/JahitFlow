@@ -28,8 +28,9 @@ import {
   ShoppingBag,
   MoreVertical,
   ChevronRight,
-  Trash2 // <-- Tambahan icon untuk hapus
-} from "lucide-react";
+  Trash2,
+  Home // <-- Tambahan icon Home
+} from "lucide-react"; //[cite: 6]
 
 // ============================================================================
 // TYPES & INITIAL DUMMY DATA
@@ -51,9 +52,9 @@ interface Customer {
     panjangCelana: number;
     lingkarPinggul: number;
   };
-}
+} //[cite: 6]
 
-const INITIAL_CUSTOMERS: Customer[] = [];
+const INITIAL_CUSTOMERS: Customer[] = []; //[cite: 6]
 
 // ============================================================================
 // MAIN CUSTOMERS COMPONENT
@@ -85,7 +86,7 @@ export default function CustomersPage() {
     panjangLengan: "",
     panjangCelana: "",
     lingkarPinggul: "",
-  });
+  }); //[cite: 6]
 
   // Ambil data dari localStorage saat halaman pertama kali dimuat
   useEffect(() => {
@@ -97,12 +98,12 @@ export default function CustomersPage() {
         console.error("Gagal membaca data dari localStorage", error);
       }
     }
-  }, []);
+  }, []); //[cite: 6]
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  };
+  }; //[cite: 6]
 
   // Filter Pelanggan
   const filteredCustomers = customers.filter(
@@ -110,10 +111,10 @@ export default function CustomersPage() {
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.phone.includes(searchQuery) ||
       c.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ); //[cite: 6]
 
   // Menghitung pelanggan setia (misal: order lebih dari 1)
-  const loyalCustomersCount = customers.filter(c => c.totalOrders > 1).length;
+  const loyalCustomersCount = customers.filter(c => c.totalOrders > 1).length; //[cite: 6]
 
   const handleCreateCustomer = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +136,7 @@ export default function CustomersPage() {
         panjangCelana: Number(customerForm.panjangCelana) || 0,
         lingkarPinggul: Number(customerForm.lingkarPinggul) || 0,
       },
-    };
+    }; //[cite: 6]
 
     const updatedCustomers = [newCust, ...customers];
     setCustomers(updatedCustomers);
@@ -147,7 +148,7 @@ export default function CustomersPage() {
       lebarBahu: "", panjangBaju: "", panjangLengan: "", panjangCelana: "", lingkarPinggul: ""
     });
     showToast(`Pelanggan ${newCust.name} berhasil ditambahkan!`);
-  };
+  }; //[cite: 6]
 
   // Fungsi Hapus Pelanggan
   const handleDeleteCustomer = (id: string, name: string) => {
@@ -158,7 +159,7 @@ export default function CustomersPage() {
       localStorage.setItem("jahitflow_customers", JSON.stringify(updatedCustomers));
       showToast(`Data ${name} berhasil dihapus!`);
     }
-  };
+  }; //[cite: 6]
 
   const navigationMenu = [
     {
@@ -182,7 +183,7 @@ export default function CustomersPage() {
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
-  ];
+  ]; //[cite: 6]
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -291,6 +292,16 @@ export default function CustomersPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden">Beranda</span>
+            </Link>
+
             <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />

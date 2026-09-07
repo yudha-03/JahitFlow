@@ -20,24 +20,25 @@ import {
   TrendingUp,
   Activity,
   CheckCircle2,
-  ChevronDown
-} from "lucide-react";
+  ChevronDown,
+  Home // <-- Tambahan icon Home
+} from "lucide-react"; //[cite: 8]
 
 // ============================================================================
 // DUMMY DATA UNTUK LAPORAN
 // ============================================================================
 
-const REPORT_PERIODS = ["Agustus 2026", "Juli 2026", "Tahun Ini", "Semua Waktu"];
+const REPORT_PERIODS = ["Agustus 2026", "Juli 2026", "Tahun Ini", "Semua Waktu"]; //[cite: 8]
 
 // Data Grafik Pendapatan Bulanan (Contoh mock data)
-const REVENUE_DATA: { month: string; amount: number; height: string }[] = [];
+const REVENUE_DATA: { month: string; amount: number; height: string }[] = []; //[cite: 8]
 
 // Data Jahitan Terlaris
-const TOP_ITEMS: { name: string; count: number; percentage: number; color: string }[] = [];
+const TOP_ITEMS: { name: string; count: number; percentage: number; color: string }[] = []; //[cite: 8]
 
 const formatRupiah = (angka: number) => {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
-};
+}; //[cite: 8]
 
 // ============================================================================
 // MAIN REPORTS COMPONENT
@@ -53,7 +54,7 @@ export default function ReportsPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  };
+  }; //[cite: 8]
 
   const navigationMenu = [
     {
@@ -77,7 +78,7 @@ export default function ReportsPage() {
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
-  ];
+  ]; //[cite: 8]
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -186,6 +187,16 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden">Beranda</span>
+            </Link>
+
             <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
               <Bell className="w-5 h-5" />
             </button>

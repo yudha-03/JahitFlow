@@ -314,7 +314,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-50 bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-emerald-700"
+            className="fixed top-3 right-3 sm:top-5 sm:right-5 z-50 max-w-[calc(100vw-1.5rem)] bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-emerald-700"
           >
             <CheckCircle2 className="w-5 h-5 text-emerald-300" />
             <span>{toastMessage}</span>
@@ -427,7 +427,7 @@ export default function DashboardPage() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
@@ -446,11 +446,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
             
             <Link
               href="/"
-              className="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 rounded-xl transition-all shadow-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 rounded-xl transition-all shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Kembali ke Beranda</span>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
 
             <button
               type="button"
-              className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none"
+              className="relative p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none"
               aria-label="Notifikasi"
             >
               <Bell className="w-5 h-5" />
@@ -478,15 +478,15 @@ export default function DashboardPage() {
         </header>
 
         {/* Dashboard Main View */}
-        <main className="p-4 sm:p-8 space-y-8 max-w-7xl w-full mx-auto">
+        <main className="p-3 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full mx-auto">
           
           {/* Greeting Banner */}
-          <div className="bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-950/10 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 rounded-3xl p-5 sm:p-8 text-white shadow-xl shadow-indigo-950/10 relative overflow-hidden">
             <div className="relative z-10 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 text-xs font-semibold mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Meja Kerja Digital Penjahit
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+              <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight mb-2">
                 Selamat datang kembali, Satria 👋
               </h2>
               <p className="text-indigo-200 text-sm sm:text-base leading-relaxed">
@@ -503,15 +503,15 @@ export default function DashboardPage() {
             <h3 className="text-sm font-bold text-slate-500 tracking-wider uppercase">
               Aksi Cepat
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
               
               {/* Button 1: Pesanan Baru (Opens Modal) */}
               <button
                 type="button"
                 onClick={() => setActiveModal("new-order")}
-                className="flex items-center gap-3 p-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-2xl font-bold shadow-md shadow-indigo-600/15 transition-all text-left group"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-2xl font-bold shadow-md shadow-indigo-600/15 transition-all text-left group"
               >
-                <div className="p-2 bg-white/20 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                <div className="p-1.5 sm:p-2 bg-white/20 rounded-xl group-hover:scale-105 transition-transform shrink-0">
                   <Plus className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
@@ -524,9 +524,9 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("new-customer")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
               >
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                <div className="p-1.5 sm:p-2 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
@@ -539,9 +539,9 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("search-size")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
               >
-                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                <div className="p-1.5 sm:p-2 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
                   <Ruler className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
@@ -554,9 +554,9 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("payment")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-bold shadow-sm transition-all text-left group"
               >
-                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                <div className="p-1.5 sm:p-2 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
@@ -579,10 +579,10 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={idx}
-                    className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all flex flex-col justify-between"
+                    className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all flex flex-col justify-between"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wide">
                         {card.title}
                       </span>
                       <div className={`p-2 rounded-xl border ${card.color}`}>
@@ -605,7 +605,7 @@ export default function DashboardPage() {
 
           {/* Pesanan Berjalan */}
           <section className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <h3 className="text-sm font-bold text-slate-500 tracking-wider uppercase">
                 Pesanan Berjalan Terbaru
               </h3>
@@ -683,7 +683,7 @@ export default function DashboardPage() {
                       <h4 className="font-bold text-slate-900 text-base">{order.customerName}</h4>
                       <p className="text-xs text-slate-500">{order.itemName}</p>
                     </div>
-                    <div className="flex items-center justify-between pt-2 text-xs font-semibold text-slate-600">
+                    <div className="flex items-center justify-between flex-wrap gap-2 pt-2 text-xs font-semibold text-slate-600">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5 text-slate-400" /> Ambil: {order.dueDate}
                       </span>
@@ -699,7 +699,7 @@ export default function DashboardPage() {
 
           {/* Ringkasan Keuangan */}
           <section className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <h3 className="text-sm font-bold text-slate-500 tracking-wider uppercase">
                 Ringkasan Keuangan Bulan Ini
               </h3>
@@ -708,7 +708,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Wallet className="w-4 h-4 text-slate-400" /> Pendapatan Bulan Ini
@@ -750,7 +750,7 @@ export default function DashboardPage() {
       {/* MODAL 1: PESANAN BARU */}
       <AnimatePresence>
         {activeModal === "new-order" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setActiveModal(null)}
@@ -760,15 +760,15 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
             >
-              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+              <div className="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-600 rounded-xl">
                     <Plus className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Tambah Pesanan Baru</h3>
+                    <h3 className="font-extrabold text-base sm:text-lg">Tambah Pesanan Baru</h3>
                     <p className="text-xs text-slate-400">Input detail pakaian & tanggal pengambilannya</p>
                   </div>
                 </div>
@@ -781,7 +781,7 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateOrder} className="p-6 space-y-4 overflow-y-auto flex-1">
+              <form onSubmit={handleCreateOrder} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     Nama Pelanggan <span className="text-red-500">*</span>
@@ -849,17 +849,17 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setActiveModal(null)}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
                   >
                     Simpan Pesanan
                   </button>
@@ -873,7 +873,7 @@ export default function DashboardPage() {
       {/* MODAL 2: PELANGGAN BARU + UKURAN BADAN */}
       <AnimatePresence>
         {activeModal === "new-customer" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setActiveModal(null)}
@@ -883,15 +883,15 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
             >
-              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+              <div className="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-600 rounded-xl">
                     <UserPlus className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Tambah Pelanggan Baru</h3>
+                    <h3 className="font-extrabold text-base sm:text-lg">Tambah Pelanggan Baru</h3>
                     <p className="text-xs text-slate-400">Simpan kontak dan catatan ukuran badan langsung</p>
                   </div>
                 </div>
@@ -904,7 +904,7 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateCustomer} className="p-6 space-y-6 overflow-y-auto flex-1">
+              <form onSubmit={handleCreateCustomer} className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
                 <div className="space-y-3">
                   <h4 className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
                     <Users className="w-4 h-4" /> Informasi Pelanggan
@@ -984,17 +984,17 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setActiveModal(null)}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
                   >
                     Simpan Pelanggan & Ukuran
                   </button>
@@ -1008,7 +1008,7 @@ export default function DashboardPage() {
       {/* MODAL 3: CARI UKURAN */}
       <AnimatePresence>
         {activeModal === "search-size" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setActiveModal(null)}
@@ -1018,15 +1018,15 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
             >
-              <div className="p-6 bg-amber-500 text-white flex items-center justify-between">
+              <div className="p-4 sm:p-6 bg-amber-500 text-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-amber-600 rounded-xl">
                     <Ruler className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Cari Ukuran Pelanggan</h3>
+                    <h3 className="font-extrabold text-base sm:text-lg">Cari Ukuran Pelanggan</h3>
                     <p className="text-xs text-amber-100">Temukan ukuran badan tanpa perlu membuka buku catatan</p>
                   </div>
                 </div>
@@ -1039,7 +1039,7 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <div className="p-6 space-y-6 overflow-y-auto flex-1">
+              <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
                 <div className="relative">
                   <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
                   <input
@@ -1077,7 +1077,7 @@ export default function DashboardPage() {
                   <div className="md:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                     {selectedCustomerForSize ? (
                       <>
-                        <div className="flex items-start justify-between border-b border-slate-200 pb-3">
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-2 border-b border-slate-200 pb-3">
                           <div>
                             <h4 className="font-extrabold text-slate-900 text-lg">
                               {selectedCustomerForSize.name}
@@ -1086,7 +1086,7 @@ export default function DashboardPage() {
                               <Phone className="w-3.5 h-3.5" /> {selectedCustomerForSize.phone}
                             </p>
                           </div>
-                          <span className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-200">
+                          <span className="self-start px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-200">
                             Diukur: {selectedCustomerForSize.lastMeasurementDate}
                           </span>
                         </div>
@@ -1147,7 +1147,7 @@ export default function DashboardPage() {
       {/* MODAL 4: CATAT PEMBAYARAN */}
       <AnimatePresence>
         {activeModal === "payment" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setActiveModal(null)}
@@ -1157,15 +1157,15 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10"
+              className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10"
             >
-              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+              <div className="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-600 rounded-xl">
                     <Receipt className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Catat Pembayaran</h3>
+                    <h3 className="font-extrabold text-base sm:text-lg">Catat Pembayaran</h3>
                     <p className="text-xs text-slate-400">Input transaksi DP atau Pelunasan</p>
                   </div>
                 </div>
@@ -1232,17 +1232,17 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setActiveModal(null)}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20"
                   >
                     Simpan Pembayaran
                   </button>

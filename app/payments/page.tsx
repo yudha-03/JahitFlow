@@ -27,8 +27,9 @@ import {
   Download,
   MoreVertical,
   Check,
-  Printer
-} from "lucide-react";
+  Printer,
+  Home // <-- Tambahan icon Home
+} from "lucide-react"; //[cite: 7]
 
 // ============================================================================
 // TYPES & INITIAL DATA
@@ -47,16 +48,16 @@ interface Transaction {
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
   notes?: string;
-}
+} //[cite: 7]
 
 // Data awal dikosongkan
-const INITIAL_TRANSACTIONS: Transaction[] = [];
+const INITIAL_TRANSACTIONS: Transaction[] = []; //[cite: 7]
 
-const STATUS_TABS = ["Semua", "Lunas", "DP", "Belum Bayar"];
+const STATUS_TABS = ["Semua", "Lunas", "DP", "Belum Bayar"]; //[cite: 7]
 
 const formatRupiah = (angka: number) => {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
-};
+}; //[cite: 7]
 
 // Helper Badge Status
 const getStatusBadge = (status: PaymentStatus) => {
@@ -68,7 +69,7 @@ const getStatusBadge = (status: PaymentStatus) => {
     case "Belum Bayar":
       return <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-rose-50 text-rose-700 border border-rose-200">Belum Bayar</span>;
   }
-};
+}; //[cite: 7]
 
 // ============================================================================
 // MAIN PAYMENTS COMPONENT
@@ -96,12 +97,12 @@ export default function PaymentsPage() {
     paidAmount: "",
     paymentMethod: "Cash" as PaymentMethod,
     notes: "",
-  });
+  }); //[cite: 7]
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  };
+  }; //[cite: 7]
 
   // Filter & Search Logic
   const filteredTransactions = transactions.filter((trx) => {
@@ -111,12 +112,12 @@ export default function PaymentsPage() {
       trx.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Semua" || trx.status === activeTab;
     return matchesSearch && matchesTab;
-  });
+  }); //[cite: 7]
 
   // Kalkulasi Statistik
   const totalPendapatan = transactions.reduce((acc, curr) => acc + curr.paidAmount, 0);
   const totalPiutang = transactions.reduce((acc, curr) => acc + (curr.totalAmount - curr.paidAmount), 0);
-  const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length;
+  const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length; //[cite: 7]
 
   // Handler Submit Transaksi Baru
   const handleSavePayment = (e: React.FormEvent) => {
@@ -162,7 +163,7 @@ export default function PaymentsPage() {
     });
     
     showToast("Transaksi pembayaran berhasil dicatat!");
-  };
+  }; //[cite: 7]
 
   // Handler Lunasi Instan
   const handleLunasi = (id: string) => {
@@ -180,7 +181,7 @@ export default function PaymentsPage() {
       })
     );
     showToast("Pembayaran berhasil dilunasi!");
-  };
+  }; //[cite: 7]
 
   const navigationMenu = [
     {
@@ -204,7 +205,7 @@ export default function PaymentsPage() {
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
-  ];
+  ]; //[cite: 7]
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -313,6 +314,16 @@ export default function PaymentsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden">Beranda</span>
+            </Link>
+
             <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
               <Bell className="w-5 h-5" />
             </button>

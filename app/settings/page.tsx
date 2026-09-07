@@ -21,8 +21,9 @@ import {
   Landmark,
   Save,
   MessageSquare,
-  ShieldAlert
-} from "lucide-react";
+  ShieldAlert,
+  Home // <-- Tambahan icon Home
+} from "lucide-react"; //[cite: 9]
 
 // ============================================================================
 // MAIN SETTINGS COMPONENT
@@ -52,12 +53,12 @@ export default function SettingsPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  };
+  }; //[cite: 9]
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     showToast("Pengaturan berhasil disimpan!");
-  };
+  }; //[cite: 9]
 
   const navigationMenu = [
     {
@@ -81,7 +82,7 @@ export default function SettingsPage() {
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
-  ];
+  ]; //[cite: 9]
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -190,6 +191,16 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden">Beranda</span>
+            </Link>
+
             <button type="button" className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
               <Bell className="w-5 h-5" />
             </button>
