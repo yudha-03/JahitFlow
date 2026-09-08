@@ -175,18 +175,21 @@ export default function ReportsPage() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none shrink-0">
               <Menu className="w-6 h-6" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">Laporan & Analitik</h1>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+                <span className="sm:hidden">Laporan</span>
+                <span className="hidden sm:inline">Laporan & Analitik</span>
+              </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-medium hidden sm:block truncate">Pantau performa bisnis dan statistik pesanan jahitan.</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
             <Link
               href="/"
