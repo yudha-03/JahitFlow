@@ -27,7 +27,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   
   // State interaksi
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,44 +51,8 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
-
-    // Ambil akun yang tersimpan dari localStorage
-    setTimeout(() => {
-      const users = JSON.parse(
-        localStorage.getItem("jahitflow_users") || "[]"
-      );
-
-      const user = users.find(
-        (item: any) =>
-          item.email.toLowerCase() === email.trim().toLowerCase() &&
-          item.password === password
-      );
-
-      if (!user) {
-        setErrors({
-          general: "Email atau kata sandi belum benar. Silakan coba lagi.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Simpan informasi user yang sedang login
-      localStorage.setItem(
-        "jahitflow_current_user",
-        JSON.stringify({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          businessName: user.businessName,
-          whatsapp: user.whatsapp,
-          businessType: user.businessType,
-          address: user.address,
-        })
-      );
-
-      router.push("/dashboard");
-    }, 800);
+    // Front-end saja: langsung masuk ke dashboard, tanpa pengecekan data apa pun
+    router.push("/dashboard");
   };
 
   return (
@@ -261,20 +224,9 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full h-14 mt-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-lg rounded-xl transition-all shadow-sm shadow-indigo-600/20 disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                className="w-full h-14 mt-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-lg rounded-xl transition-all shadow-sm shadow-indigo-600/20 flex items-center justify-center gap-2 group"
               >
-                {isLoading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
-                  />
-                ) : (
-                  <>
-                    Masuk <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
+                Masuk <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
 

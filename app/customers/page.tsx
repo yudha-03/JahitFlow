@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -88,18 +88,6 @@ export default function CustomersPage() {
     lingkarPinggul: "",
   });
 
-  // Ambil data dari localStorage saat halaman pertama kali dimuat
-  useEffect(() => {
-    const savedCustomers = localStorage.getItem("jahitflow_customers");
-    if (savedCustomers) {
-      try {
-        setCustomers(JSON.parse(savedCustomers));
-      } catch (error) {
-        console.error("Gagal membaca data dari localStorage", error);
-      }
-    }
-  }, []);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -138,9 +126,7 @@ export default function CustomersPage() {
       },
     };
 
-    const updatedCustomers = [newCust, ...customers];
-    setCustomers(updatedCustomers);
-    localStorage.setItem("jahitflow_customers", JSON.stringify(updatedCustomers));
+    setCustomers([newCust, ...customers]);
 
     setIsAddModalOpen(false);
     setCustomerForm({
@@ -154,9 +140,7 @@ export default function CustomersPage() {
   const handleDeleteCustomer = (id: string, name: string) => {
     // Validasi pencegahan penghapusan tidak sengaja
     if (window.confirm(`Apakah Anda yakin ingin menghapus data pelanggan "${name}"?`)) {
-      const updatedCustomers = customers.filter((c) => c.id !== id);
-      setCustomers(updatedCustomers);
-      localStorage.setItem("jahitflow_customers", JSON.stringify(updatedCustomers));
+      setCustomers(customers.filter((c) => c.id !== id));
       showToast(`Data ${name} berhasil dihapus!`);
     }
   };

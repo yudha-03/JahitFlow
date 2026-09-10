@@ -209,9 +209,6 @@ const AccountStep = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // STATE LOADING DITAMBAHKAN
-  const [isLoading, setIsLoading] = useState(false); 
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -230,30 +227,8 @@ const AccountStep = ({
 
     if (!validate()) return;
 
-    setIsLoading(true);
-
-    // Simulasi loading agar form tidak terasa "kaku"
-    setTimeout(() => {
-      const existingUsers = JSON.parse(
-        localStorage.getItem("jahitflow_users") || "[]"
-      );
-
-      const emailExists = existingUsers.some(
-        (user: any) =>
-          user.email.toLowerCase() === formData.email.trim().toLowerCase()
-      );
-
-      if (emailExists) {
-        setErrors({
-          email: "Email sudah terdaftar. Silakan gunakan email lain.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(false);
-      onNext();
-    }, 600);
+    // Front-end saja: langsung lanjut ke step berikutnya, tanpa menyimpan data apa pun
+    onNext();
   };
 
   return (
@@ -366,21 +341,10 @@ const AccountStep = ({
 
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors mt-6 disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors mt-6"
         >
-          {isLoading ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
-            />
-          ) : (
-            <>
-              Buat Akun
-              <ArrowRight size={20} />
-            </>
-          )}
+          Buat Akun
+          <ArrowRight size={20} />
         </button>
 
         <p className="text-center text-sm text-gray-600 mt-8">
@@ -406,9 +370,6 @@ const BusinessStep = ({
   onNext: () => void;
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // STATE LOADING DITAMBAHKAN
-  const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -428,48 +389,8 @@ const BusinessStep = ({
 
     if (!validate()) return;
 
-    setIsLoading(true);
-
-    // Animasi proses penyimpanan data
-    setTimeout(() => {
-      const existingUsers = JSON.parse(
-        localStorage.getItem("jahitflow_users") || "[]"
-      );
-
-      const newUser = {
-        id: `USER-${Date.now()}`,
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-        businessName: formData.businessName.trim(),
-        whatsapp: formData.whatsapp.trim(),
-        businessType: formData.businessType,
-        address: formData.address.trim(),
-      };
-
-      // Simpan User Baru
-      localStorage.setItem(
-        "jahitflow_users",
-        JSON.stringify([...existingUsers, newUser])
-      );
-      
-      // Sekaligus auto-login agar tidak perlu ketik ulang
-      localStorage.setItem(
-        "jahitflow_current_user",
-        JSON.stringify({
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-          businessName: newUser.businessName,
-          whatsapp: newUser.whatsapp,
-          businessType: newUser.businessType,
-          address: newUser.address,
-        })
-      );
-
-      setIsLoading(false);
-      onNext();
-    }, 1200);
+    // Front-end saja: langsung lanjut ke step berikutnya, tanpa menyimpan data apa pun
+    onNext();
   };
 
   return (
@@ -551,8 +472,7 @@ const BusinessStep = ({
           <button
             type="button"
             onClick={onBack}
-            disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 border border-gray-300 rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 border border-gray-300 rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors"
           >
             <ArrowLeft size={20} />
             Kembali
@@ -560,21 +480,10 @@ const BusinessStep = ({
           
           <button
             type="submit"
-            disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium text-lg transition-colors"
           >
-            {isLoading ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
-              />
-            ) : (
-              <>
-                Lanjutkan
-                <ArrowRight size={20} />
-              </>
-            )}
+            Lanjutkan
+            <ArrowRight size={20} />
           </button>
         </div>
       </form>

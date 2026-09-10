@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link"; // Tambahan import Link
 import {
@@ -131,6 +131,12 @@ export default function TrackingPage(): React.ReactElement {
   const [searchState, setSearchState] = useState<SearchState>("idle");
   const [orderData, setOrderData] = useState<Order | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
+  const [showIntro, setShowIntro] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowIntro(false), 1400);
+    return () => clearTimeout(timer);
+  }, []);
 
   const executeSearch = useCallback((code: string) => {
     const cleanCode = code.toUpperCase().trim();
@@ -172,6 +178,49 @@ export default function TrackingPage(): React.ReactElement {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {/* OPENING ANIMATION / SPLASH SCREEN */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-600"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col items-center gap-3"
+            >
+              <motion.div
+                initial={{ rotate: -15, scale: 0.7 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center"
+              >
+                <Scissors className="w-8 h-8 text-white" />
+              </motion.div>
+              <motion.span
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+                className="text-white font-bold text-xl tracking-tight"
+              >
+                JahitFlow
+              </motion.span>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.35, duration: 0.9, ease: "easeInOut" }}
+                className="h-0.5 w-24 bg-white/60 rounded-full origin-left"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* NAVBAR */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -211,7 +260,12 @@ export default function TrackingPage(): React.ReactElement {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showIntro ? 0 : 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-4xl mx-auto px-4 py-8 md:py-12"
+      >
         {/* HERO HEADER */}
         <div className="text-center mb-8 md:mb-12">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3">
@@ -567,7 +621,7 @@ export default function TrackingPage(): React.ReactElement {
             )}
           </AnimatePresence>
         </div>
-      </main>
+      </motion.main>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -118,14 +118,6 @@ export default function OrdersPage() {
   });
   const [editForm, setEditForm] = useState<OrderItem | null>(null);
 
-  // Load Data
-  useEffect(() => {
-    const savedOrders = localStorage.getItem("jahitflow_orders");
-    if (savedOrders) {
-      try { setOrders(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
-    }
-  }, []);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -157,9 +149,7 @@ export default function OrdersPage() {
       paid: Number(orderForm.paid) || 0,
     };
 
-    const updatedOrders = [newOrder, ...orders];
-    setOrders(updatedOrders);
-    localStorage.setItem("jahitflow_orders", JSON.stringify(updatedOrders));
+    setOrders([newOrder, ...orders]);
     setIsNewOrderModalOpen(false);
     setOrderForm({ customerName: "", phone: "", itemName: "", dueDate: "", price: "", paid: "" });
     showToast(`Pesanan ${newOrder.code} berhasil dibuat!`);
@@ -179,18 +169,14 @@ export default function OrdersPage() {
     e.preventDefault();
     if (!editForm) return;
 
-    const updatedOrders = orders.map((o) => (o.code === editForm.code ? editForm : o));
-    setOrders(updatedOrders);
-    localStorage.setItem("jahitflow_orders", JSON.stringify(updatedOrders));
+    setOrders(orders.map((o) => (o.code === editForm.code ? editForm : o)));
     setIsEditModalOpen(false);
     showToast(`Pesanan ${editForm.code} berhasil diperbarui!`);
   };
 
   const handleDeleteOrder = (code: string) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus pesanan ${code}?`)) {
-      const updatedOrders = orders.filter((o) => o.code !== code);
-      setOrders(updatedOrders);
-      localStorage.setItem("jahitflow_orders", JSON.stringify(updatedOrders));
+      setOrders(orders.filter((o) => o.code !== code));
       showToast(`Pesanan ${code} berhasil dihapus!`);
     }
   };

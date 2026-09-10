@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -134,20 +134,6 @@ export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
   const [orders, setOrders] = useState<OrderItem[]>(INITIAL_ORDERS);
 
-  // --- MEMBACA LOCALSTORAGE SAAT HALAMAN DIMUAT ---
-  useEffect(() => {
-    const savedOrders = localStorage.getItem("jahitflow_orders");
-    const savedCustomers = localStorage.getItem("jahitflow_customers");
-
-    if (savedOrders) {
-      try { setOrders(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
-    }
-    if (savedCustomers) {
-      try { setCustomers(JSON.parse(savedCustomers)); } catch (e) { console.error(e); }
-    }
-  }, []);
-  // -------------------------------------------------
-
   // State Form Pesanan Baru
   const [orderForm, setOrderForm] = useState({
     customerName: "",
@@ -190,16 +176,13 @@ export default function DashboardPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Handlers yang sudah terintegrasi localStorage
+  // Handlers (data hanya disimpan di state React, tidak persist)
   const handleCreateOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderForm.customerName || !orderForm.itemName) return;
-    
-    // Ambil data yang sudah ada agar ID berlanjut dengan benar
-    const existingOrders: OrderItem[] = JSON.parse(localStorage.getItem("jahitflow_orders") || "[]");
 
     const newOrder: OrderItem = {
-      code: `OR00${existingOrders.length + 1}`,
+      code: `OR00${orders.length + 1}`,
       customerName: orderForm.customerName,
       phone: "0812" + Math.floor(10000000 + Math.random() * 90000000),
       itemName: orderForm.itemName,
@@ -207,10 +190,8 @@ export default function DashboardPage() {
       status: "Belum Dikerjakan",
     };
 
-    // Gabungkan dan simpan ke state & localStorage
-    const updatedOrders = [newOrder, ...existingOrders];
-    setOrders(updatedOrders);
-    localStorage.setItem("jahitflow_orders", JSON.stringify(updatedOrders));
+    // Gabungkan ke state saja
+    setOrders([newOrder, ...orders]);
 
     setActiveModal(null);
     setOrderForm({ customerName: "", itemName: "", dueDate: "", totalPrice: "", downPayment: "", notes: "" });
@@ -221,11 +202,8 @@ export default function DashboardPage() {
     e.preventDefault();
     if (!customerForm.name || !customerForm.phone) return;
 
-    // Ambil data pelanggan yang sudah ada
-    const existingCustomers: Customer[] = JSON.parse(localStorage.getItem("jahitflow_customers") || "[]");
-
     const newCust: Customer = {
-      id: `CUST-00${existingCustomers.length + 1}`,
+      id: `CUST-00${customers.length + 1}`,
       name: customerForm.name,
       phone: customerForm.phone,
       address: customerForm.address || "Belum ada alamat",
@@ -241,10 +219,8 @@ export default function DashboardPage() {
       },
     };
 
-    // Gabungkan dan simpan ke state & localStorage
-    const updatedCustomers = [newCust, ...existingCustomers];
-    setCustomers(updatedCustomers);
-    localStorage.setItem("jahitflow_customers", JSON.stringify(updatedCustomers));
+    // Gabungkan ke state saja
+    setCustomers([newCust, ...customers]);
 
     setActiveModal(null);
     setCustomerForm({

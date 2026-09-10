@@ -274,7 +274,7 @@ export default function SettingsPage() {
                           type="text"
                           value={storeName}
                           onChange={(e) => setStoreName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                         />
                       </div>
                       <div>
@@ -283,7 +283,7 @@ export default function SettingsPage() {
                           type="text"
                           value={ownerName}
                           onChange={(e) => setOwnerName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                         />
                       </div>
                     </div>
@@ -294,7 +294,7 @@ export default function SettingsPage() {
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                       />
                     </div>
 
@@ -304,7 +304,7 @@ export default function SettingsPage() {
                         rows={3}
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 resize-none"
                       />
                     </div>
                   </div>
@@ -362,7 +362,7 @@ export default function SettingsPage() {
                         <select 
                           value={bankName}
                           onChange={(e) => setBankName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold bg-white"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 bg-white"
                         >
                           <option>BCA</option>
                           <option>Mandiri</option>
@@ -376,7 +376,7 @@ export default function SettingsPage() {
                           type="text"
                           value={accountNumber}
                           onChange={(e) => setAccountNumber(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                         />
                       </div>
                     </div>
@@ -387,7 +387,7 @@ export default function SettingsPage() {
                         type="text"
                         value={accountHolder}
                         onChange={(e) => setAccountHolder(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                       />
                     </div>
                   </div>
@@ -407,7 +407,7 @@ export default function SettingsPage() {
                         <input
                           type="password"
                           placeholder="••••••••"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                         />
                       </div>
                       <div>
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                         <input
                           type="password"
                           placeholder="••••••••"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
                         />
                       </div>
                     </div>
