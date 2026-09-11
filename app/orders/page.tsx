@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Scissors,
   LayoutDashboard,
@@ -98,6 +98,7 @@ const formatRupiah = (angka: number) => {
 
 export default function OrdersPage() {
   const pathname = "/orders"; 
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -288,7 +289,7 @@ export default function OrdersPage() {
                   <p className="text-xs text-slate-500 font-medium truncate">Pemilik Usaha</p>
                 </div>
               </div>
-              <button type="button" title="Keluar" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+              <button type="button" title="Keluar" onClick={() => router.push("/login")} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -299,7 +300,12 @@ export default function OrdersPage() {
       {/* Main Content Area */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 min-w-0 overflow-hidden">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 min-w-0 overflow-hidden"
+        >
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none">
               <Menu className="w-6 h-6" />
@@ -331,9 +337,14 @@ export default function OrdersPage() {
               <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
             </div>
           </div>
-        </header>
+        </motion.header>
 
-        <main className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <motion.main
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto"
+        >
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="relative w-full sm:max-w-md">
@@ -496,7 +507,7 @@ export default function OrdersPage() {
             )}
           </div>
 
-        </main>
+        </motion.main>
       </div>
 
       {/* =========================================================================

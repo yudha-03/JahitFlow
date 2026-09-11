@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Scissors,
   LayoutDashboard,
@@ -31,6 +31,7 @@ import {
 
 export default function SettingsPage() {
   const pathname = "/settings";
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"profil" | "notifikasi" | "rekening" | "keamanan">("profil");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -167,7 +168,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-500 font-medium truncate">Pemilik Usaha</p>
                 </div>
               </div>
-              <button type="button" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+              <button type="button" title="Keluar" onClick={() => router.push("/login")} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -179,7 +180,12 @@ export default function SettingsPage() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden"
+        >
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none shrink-0">
               <Menu className="w-6 h-6" />
@@ -209,10 +215,15 @@ export default function SettingsPage() {
               <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
             </div>
           </div>
-        </header>
+        </motion.header>
 
         {/* Settings Content */}
-        <main className="p-4 sm:p-8 space-y-6 max-w-5xl w-full mx-auto">
+        <motion.main
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="p-4 sm:p-8 space-y-6 max-w-5xl w-full mx-auto"
+        >
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             
@@ -437,7 +448,7 @@ export default function SettingsPage() {
 
           </div>
 
-        </main>
+        </motion.main>
 
         <footer className="mt-auto border-t border-slate-200/80 bg-white py-6 px-4 sm:px-8 text-center text-xs font-medium text-slate-400">
           &copy; {new Date().getFullYear()} JahitFlow. Hak Cipta Dilindungi.

@@ -274,7 +274,6 @@ export default function DashboardPage() {
     {
       group: "NAVIGASI",
       items: [
-        { name: "Kembali ke Beranda", href: "/", icon: Home }, 
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
@@ -403,7 +402,12 @@ export default function DashboardPage() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4"
+        >
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
@@ -451,10 +455,15 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-        </header>
+        </motion.header>
 
         {/* Dashboard Main View */}
-        <main className="p-3 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full mx-auto">
+        <motion.main
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="p-3 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full mx-auto"
+        >
           
           {/* Greeting Banner */}
           <div className="bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 rounded-3xl p-5 sm:p-8 text-white shadow-xl shadow-indigo-950/10 relative overflow-hidden">
@@ -711,7 +720,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-        </main>
+        </motion.main>
 
         <footer className="mt-auto border-t border-slate-200/80 bg-white py-6 px-4 sm:px-8 text-center text-xs font-medium text-slate-400">
           &copy; {new Date().getFullYear()} JahitFlow. Hak Cipta Dilindungi.
