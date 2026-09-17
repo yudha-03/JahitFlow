@@ -5,8 +5,11 @@ import Link from "next/link";
 import { 
   Scissors, Users, Ruler, ClipboardList, CreditCard, BarChart3, 
   Search, CheckCircle2, ArrowRight, Clock, ShieldCheck, ChevronRight, 
-  Menu, X, Shirt, PackageCheck, FileText, Check, Store, ArrowUpRight
+  Menu, X, Shirt, PackageCheck, FileText, Check, Store, ArrowUpRight,
+  LayoutDashboard, Settings, Plus, UserPlus, Receipt, ScissorsLineDashed,
+  Sparkles, ShoppingBag, Wallet, Circle
 } from "lucide-react";
+import { OrderStatusBadge, PaymentStatusBadge } from "@/components/StatusBadge";
 
 export default function RedesignedLandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,7 +19,7 @@ export default function RedesignedLandingPage() {
   const [activeFeature, setActiveFeature] = useState<"pesanan" | "pelanggan" | "ukuran" | "pembayaran" | "laporan" | "tracking">("pesanan");
 
   // State untuk Live Tracking Interactive Preview
-  const [trackingCode, setTrackingCode] = useState("OR-8821");
+  const [trackingCode, setTrackingCode] = useState("OR001");
   const [isTrackingSearched, setIsTrackingSearched] = useState(true);
 
   // State untuk Filter Dashboard Preview
@@ -183,8 +186,8 @@ export default function RedesignedLandingPage() {
                   <Check size={18} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">Pesanan Selesai</p>
-                  <p className="text-[10px] text-slate-500">Gamis Batik Bu Ani</p>
+                  <p className="text-xs font-bold text-slate-800">Pesanan Siap Diambil</p>
+                  <p className="text-[10px] text-slate-500">Kebaya Brukat — Ibu Ratna</p>
                 </div>
               </div>
 
@@ -194,7 +197,7 @@ export default function RedesignedLandingPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-800">Ukuran Tersimpan</p>
-                  <p className="text-[10px] text-slate-500">12 Parameter Badan</p>
+                  <p className="text-[10px] text-slate-500">7 Parameter Badan Standar</p>
                 </div>
               </div>
 
@@ -207,73 +210,223 @@ export default function RedesignedLandingPage() {
                     <div className="w-3 h-3 rounded-full bg-rose-400" />
                     <div className="w-3 h-3 rounded-full bg-amber-400" />
                     <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                    <span className="text-xs font-semibold text-slate-500 ml-2 hidden sm:inline">JahitFlow App — Dashboard Usaha Jahit</span>
+                    <span className="text-xs font-semibold text-slate-500 ml-2 hidden sm:inline">JahitFlow — Meja Kerja Digital Penjahit</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-md border border-stone-200 text-[11px] text-slate-500 font-mono">
-                    <Store size={12} /> Satria Tailor (Aktif)
+                  <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-md border border-stone-200 text-[11px] text-slate-700 font-semibold shadow-2xs">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Satria Tailor (Aktif)
                   </div>
                 </div>
 
-                {/* Window Body Mockup */}
-                <div className="p-4 sm:p-6 bg-[#FBF9F6]">
-                  {/* Summary Metric Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                    <div className="bg-white p-3.5 rounded-xl border border-stone-200 shadow-2xs">
-                      <p className="text-[11px] font-semibold text-slate-500">Total Pesanan</p>
-                      <p className="text-xl font-extrabold text-slate-900">24 <span className="text-xs font-normal text-slate-400">baju</span></p>
+                {/* Window Body Mockup (Sidebar + Main Content Area) */}
+                <div className="flex bg-[#F8FAFC]">
+                  {/* Mini Sidebar Mockup (Desktop) */}
+                  <div className="hidden md:flex flex-col w-48 bg-white border-r border-slate-200/80 p-3 justify-between shrink-0">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2.5 px-2 py-1.5 border-b border-slate-100 pb-3">
+                        <div className="p-1.5 bg-indigo-600 text-white rounded-lg">
+                          <Scissors className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-black text-xs text-indigo-950 leading-none">JahitFlow</span>
+                          <span className="text-[9px] text-slate-400 font-medium">Satria Tailor</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 text-[11px] font-semibold">
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-indigo-600 text-white shadow-xs">
+                          <LayoutDashboard className="w-3.5 h-3.5" />
+                          <span>Dashboard</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                          <Scissors className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pesanan</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                          <Users className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pelanggan</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                          <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pembayaran</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                          <BarChart3 className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Laporan</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                          <Settings className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pengaturan</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-white p-3.5 rounded-xl border border-stone-200 shadow-2xs">
-                      <p className="text-[11px] font-semibold text-amber-600">Sedang Dijahit</p>
-                      <p className="text-xl font-extrabold text-slate-900">8 <span className="text-xs font-normal text-slate-400">proses</span></p>
-                    </div>
-                    <div className="bg-white p-3.5 rounded-xl border border-stone-200 shadow-2xs">
-                      <p className="text-[11px] font-semibold text-emerald-600">Siap Diambil</p>
-                      <p className="text-xl font-extrabold text-slate-900">5 <span className="text-xs font-normal text-slate-400">selesai</span></p>
-                    </div>
-                    <div className="bg-white p-3.5 rounded-xl border border-stone-200 shadow-2xs">
-                      <p className="text-[11px] font-semibold text-indigo-600">Pendapatan Bulan Ini</p>
-                      <p className="text-xl font-extrabold text-slate-900">Rp 4.5jt</p>
+
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-[10px]">
+                      <div className="w-6 h-6 rounded bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center">S</div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-800 truncate leading-none">Satria</p>
+                        <p className="text-[9px] text-slate-400 truncate">Pemilik Usaha</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Orders Table Preview */}
-                  <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
-                      <span className="text-xs font-bold text-slate-800">Antrean Pesanan Aktif</span>
-                      <span className="text-[11px] text-indigo-700 font-bold cursor-pointer hover:underline">Lihat Semua →</span>
-                    </div>
-                    <div className="divide-y divide-stone-100 text-xs">
-                      <div className="p-3 flex items-center justify-between hover:bg-stone-50 transition">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-slate-400 text-[11px]">#OR-8821</span>
-                          <div>
-                            <p className="font-bold text-slate-800">Pak Budi Santoso</p>
-                            <p className="text-[11px] text-slate-500">Kemeja Batik Sutra + Furing</p>
-                          </div>
+                  {/* Main Content Mockup */}
+                  <div className="flex-1 p-3.5 sm:p-5 space-y-4 overflow-hidden">
+                    
+                    {/* Greeting Banner */}
+                    <div className="bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 rounded-xl sm:rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+                      <div className="relative z-10">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 text-[10px] font-semibold mb-1.5">
+                          <Sparkles className="w-3 h-3 text-amber-300" /> Meja Kerja Digital Penjahit
                         </div>
-                        <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">● Dijahit</span>
-                      </div>
-                      <div className="p-3 flex items-center justify-between hover:bg-stone-50 transition">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-slate-400 text-[11px]">#OR-8822</span>
-                          <div>
-                            <p className="font-bold text-slate-800">Ibu Siti Aminah</p>
-                            <p className="text-[11px] text-slate-500">Gamis Pesta Brokat</p>
-                          </div>
-                        </div>
-                        <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold">● Pemotongan</span>
-                      </div>
-                      <div className="p-3 flex items-center justify-between hover:bg-stone-50 transition">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-slate-400 text-[11px]">#OR-8823</span>
-                          <div>
-                            <p className="font-bold text-slate-800">Mas Andi</p>
-                            <p className="text-[11px] text-slate-500">Celana Bahan Formal</p>
-                          </div>
-                        </div>
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">✓ Siap Diambil</span>
+                        <h3 className="text-sm sm:text-base font-extrabold tracking-tight">
+                          Selamat datang kembali, Satria 👋
+                        </h3>
+                        <p className="text-indigo-200 text-xs mt-0.5">
+                          Ada <span className="text-white font-bold underline decoration-amber-400">4 pesanan aktif</span> saat ini.
+                        </p>
                       </div>
                     </div>
+
+                    {/* Quick Actions Bar */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
+                      <div className="p-2.5 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-xs">
+                        <div className="p-1 bg-white/20 rounded-lg shrink-0">
+                          <Plus className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs leading-none truncate">Pesanan Baru</p>
+                          <p className="text-[9px] font-normal text-indigo-200 hidden sm:block mt-0.5">Buat orderan</p>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 bg-white border border-slate-200 text-slate-800 rounded-xl font-bold flex items-center gap-2 shadow-2xs">
+                        <div className="p-1 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                          <UserPlus className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs leading-none truncate">Pelanggan Baru</p>
+                          <p className="text-[9px] font-normal text-slate-400 hidden sm:block mt-0.5">+ Ukuran badan</p>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 bg-white border border-slate-200 text-slate-800 rounded-xl font-bold flex items-center gap-2 shadow-2xs">
+                        <div className="p-1 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                          <Ruler className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs leading-none truncate">Cari Ukuran</p>
+                          <p className="text-[9px] font-normal text-slate-400 hidden sm:block mt-0.5">Cek data cepat</p>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 bg-white border border-slate-200 text-slate-800 rounded-xl font-bold flex items-center gap-2 shadow-2xs">
+                        <div className="p-1 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                          <Receipt className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs leading-none truncate">Catat Bayar</p>
+                          <p className="text-[9px] font-normal text-slate-400 hidden sm:block mt-0.5">Input DP / Lunas</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4 Summary Cards Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Pesanan Aktif</span>
+                          <div className="p-1 rounded-md bg-indigo-50 text-indigo-600"><ShoppingBag className="w-3 h-3" /></div>
+                        </div>
+                        <p className="text-lg font-black text-slate-900 leading-tight">4</p>
+                        <p className="text-[9px] text-slate-400">Sedang diproses</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Sedang Dijahit</span>
+                          <div className="p-1 rounded-md bg-blue-50 text-blue-600"><Scissors className="w-3 h-3" /></div>
+                        </div>
+                        <p className="text-lg font-black text-slate-900 leading-tight">2</p>
+                        <p className="text-[9px] text-slate-400">Dalam pengerjaan</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Siap Diambil</span>
+                          <div className="p-1 rounded-md bg-emerald-50 text-emerald-600"><CheckCircle2 className="w-3 h-3" /></div>
+                        </div>
+                        <p className="text-lg font-black text-slate-900 leading-tight">1</p>
+                        <p className="text-[9px] text-slate-400">Menunggu diambil</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Pesanan Selesai</span>
+                          <div className="p-1 rounded-md bg-purple-50 text-purple-600"><Sparkles className="w-3 h-3" /></div>
+                        </div>
+                        <p className="text-lg font-black text-slate-900 leading-tight">1</p>
+                        <p className="text-[9px] text-slate-400">Sudah diserahkan</p>
+                      </div>
+                    </div>
+
+                    {/* Orders Table Preview */}
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                      <div className="px-3.5 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/60">
+                        <span className="text-xs font-bold text-slate-800">Pesanan Berjalan Terbaru</span>
+                        <span className="text-[10px] text-indigo-700 font-bold hover:underline cursor-pointer">Lihat Semua →</span>
+                      </div>
+                      <div className="divide-y divide-slate-100 text-xs">
+                        <div className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-extrabold text-indigo-700 text-xs">OR001</span>
+                            <div>
+                              <p className="font-bold text-slate-900 leading-tight">Ibu Ratna</p>
+                              <p className="text-[11px] text-slate-500">Kebaya Brukat Hijau Emerald</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                              <Clock className="w-3 h-3 text-slate-400" /> 28 Ags 2026
+                            </span>
+                            <OrderStatusBadge status="Dijahit" />
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-extrabold text-indigo-700 text-xs">OR002</span>
+                            <div>
+                              <p className="font-bold text-slate-900 leading-tight">Bapak Budi</p>
+                              <p className="text-[11px] text-slate-500">Setelan Jas Pria Formal</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                              <Clock className="w-3 h-3 text-slate-400" /> 05 Sep 2026
+                            </span>
+                            <OrderStatusBadge status="Dipotong" />
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-extrabold text-indigo-700 text-xs">OR003</span>
+                            <div>
+                              <p className="font-bold text-slate-900 leading-tight">Mbak Siti</p>
+                              <p className="text-[11px] text-slate-500">Gaun Pesta Silk Satin</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                              <Clock className="w-3 h-3 text-slate-400" /> 22 Ags 2026
+                            </span>
+                            <OrderStatusBadge status="Siap Diambil" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -441,25 +594,41 @@ export default function RedesignedLandingPage() {
               {activeFeature === "pesanan" && (
                 <div className="space-y-4 animate-fadeIn">
                   <div className="flex justify-between items-center border-b border-stone-100 pb-3">
-                    <h4 className="font-extrabold text-slate-900 text-base">Daftar Pesanan Jahitan</h4>
-                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-bold">12 Pesanan Aktif</span>
+                    <h4 className="font-extrabold text-slate-900 text-base">Daftar Antrean Pesanan</h4>
+                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-bold">4 Pesanan Aktif</span>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex justify-between items-center">
-                      <div>
-                        <span className="text-[10px] font-mono text-slate-400">#OR-8821</span>
-                        <p className="font-bold text-sm text-slate-800">Budi Santoso — Kemeja Batik</p>
-                        <p className="text-xs text-slate-500">Target Selesai: 28 Ags 2026</p>
+                      <div className="flex items-center gap-3">
+                        <span className="font-extrabold text-indigo-700 text-xs">OR001</span>
+                        <div>
+                          <p className="font-bold text-sm text-slate-900">Ibu Ratna — Kebaya Brukat</p>
+                          <p className="text-xs text-slate-500">Tenggat Ambil: 28 Ags 2026</p>
+                        </div>
                       </div>
-                      <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs">Dijahit</span>
+                      <OrderStatusBadge status="Dijahit" />
                     </div>
+
                     <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex justify-between items-center">
-                      <div>
-                        <span className="text-[10px] font-mono text-slate-400">#OR-8820</span>
-                        <p className="font-bold text-sm text-slate-800">Siti Aminah — Gaun Brokat</p>
-                        <p className="text-xs text-slate-500">Target Selesai: 25 Ags 2026</p>
+                      <div className="flex items-center gap-3">
+                        <span className="font-extrabold text-indigo-700 text-xs">OR002</span>
+                        <div>
+                          <p className="font-bold text-sm text-slate-900">Bapak Budi — Jas Formal</p>
+                          <p className="text-xs text-slate-500">Tenggat Ambil: 05 Sep 2026</p>
+                        </div>
                       </div>
-                      <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full font-bold text-xs">Pemotongan</span>
+                      <OrderStatusBadge status="Dipotong" />
+                    </div>
+
+                    <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <span className="font-extrabold text-indigo-700 text-xs">OR003</span>
+                        <div>
+                          <p className="font-bold text-sm text-slate-900">Mbak Siti — Gaun Pesta</p>
+                          <p className="text-xs text-slate-500">Tenggat Ambil: 22 Ags 2026</p>
+                        </div>
+                      </div>
+                      <OrderStatusBadge status="Siap Diambil" />
                     </div>
                   </div>
                 </div>
@@ -470,51 +639,73 @@ export default function RedesignedLandingPage() {
                 <div className="space-y-4 animate-fadeIn">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 text-slate-400" size={16} />
-                    <input type="text" readOnly value="Cari nama pelanggan... (Budi Santoso)" className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs text-slate-600 focus:outline-none" />
+                    <input type="text" readOnly value="Cari nama pelanggan... (Ibu Ratna)" className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs text-slate-600 focus:outline-none" />
                   </div>
-                  <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                  <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-3">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-sm">Budi Santoso</h4>
-                        <p className="text-xs text-slate-500">WhatsApp: 0812-3456-7890</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+                          R
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm">Ibu Ratna</h4>
+                          <p className="text-xs text-slate-500">WhatsApp: 0812-3456-7890</p>
+                          <p className="text-[11px] text-slate-400">Jl. Melati No. 12, Bandung</p>
+                        </div>
                       </div>
                       <span className="text-xs bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">3 Pesanan</span>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-indigo-100/80 flex items-center gap-2 text-xs text-emerald-700 font-semibold">
-                      <CheckCircle2 size={14} /> Ukuran Badan Tersimpan
+                    <div className="pt-2.5 border-t border-indigo-100/80 flex items-center justify-between text-xs">
+                      <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+                        <CheckCircle2 size={14} /> 7 Parameter Ukuran Tersimpan
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-medium">Ukur Terakhir: 16 Ags 2026</span>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Feature 3 Preview: Ukuran */}
+              {/* Feature 3 Preview: Ukuran (7 Parameter Standar JahitFlow) */}
               {activeFeature === "ukuran" && (
                 <div className="space-y-3 animate-fadeIn">
-                  <h4 className="font-bold text-sm text-slate-900 border-b border-stone-100 pb-2">Detail Ukuran: Budi Santoso (Kemeja)</h4>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                      <p className="text-[10px] text-slate-500">Panjang Baju</p>
-                      <p className="font-extrabold text-slate-800 text-sm">72 cm</p>
-                    </div>
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
+                  <div className="flex justify-between items-center border-b border-stone-100 pb-2">
+                    <h4 className="font-bold text-sm text-slate-900">Parameter Ukuran Badan (Ibu Ratna)</h4>
+                    <span className="text-[11px] bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">
+                      7 Parameter Standar
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
                       <p className="text-[10px] text-slate-500">Lingkar Dada</p>
-                      <p className="font-extrabold text-slate-800 text-sm">104 cm</p>
+                      <p className="font-extrabold text-slate-900 text-sm">96 cm</p>
                     </div>
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                      <p className="text-[10px] text-slate-500">Panjang Lengan</p>
-                      <p className="font-extrabold text-slate-800 text-sm">60 cm</p>
-                    </div>
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                      <p className="text-[10px] text-slate-500">Lingkar Leher</p>
-                      <p className="font-extrabold text-slate-800 text-sm">42 cm</p>
-                    </div>
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                      <p className="text-[10px] text-slate-500">Lebar Bahu</p>
-                      <p className="font-extrabold text-slate-800 text-sm">46 cm</p>
-                    </div>
-                    <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
                       <p className="text-[10px] text-slate-500">Lingkar Pinggang</p>
-                      <p className="font-extrabold text-slate-800 text-sm">98 cm</p>
+                      <p className="font-extrabold text-slate-900 text-sm">78 cm</p>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Lebar Bahu</p>
+                      <p className="font-extrabold text-slate-900 text-sm">39 cm</p>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Panjang Baju</p>
+                      <p className="font-extrabold text-slate-900 text-sm">65 cm</p>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Panjang Lengan</p>
+                      <p className="font-extrabold text-slate-900 text-sm">54 cm</p>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Panjang Celana</p>
+                      <p className="font-extrabold text-slate-900 text-sm">92 cm</p>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Lingkar Pinggul</p>
+                      <p className="font-extrabold text-slate-900 text-sm">98 cm</p>
+                    </div>
+                    <div className="bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-center">
+                      <p className="text-[10px] text-indigo-600 font-bold">Status Ukuran</p>
+                      <p className="font-black text-indigo-900 text-xs">Lengkap ✓</p>
                     </div>
                   </div>
                 </div>
@@ -522,19 +713,29 @@ export default function RedesignedLandingPage() {
 
               {/* Feature 4 Preview: Pembayaran */}
               {activeFeature === "pembayaran" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-500">Total Biaya Jahit:</span>
-                      <span className="font-bold text-slate-900">Rp 350.000</span>
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex justify-between items-center border-b border-stone-100 pb-2">
+                    <h4 className="font-bold text-sm text-slate-900">Catatan Transaksi Pembayaran</h4>
+                    <span className="text-[11px] font-mono text-slate-400">INV-2026-001</span>
+                  </div>
+                  <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2.5">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500">Total Biaya Jahit (Kebaya Brukat):</span>
+                      <span className="font-bold text-slate-900">Rp 450.000</span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-500">Uang Muka (DP):</span>
-                      <span className="font-bold text-emerald-600">Rp 150.000 (Lunas)</span>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500">Uang Muka Diterima (DP):</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-emerald-700">Rp 200.000</span>
+                        <PaymentStatusBadge status="DP" />
+                      </div>
                     </div>
-                    <div className="pt-2 border-t border-stone-200 flex justify-between text-sm font-bold">
+                    <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-bold">
                       <span className="text-slate-800">Sisa Pelunasan:</span>
-                      <span className="text-amber-700">Rp 200.000</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-rose-600">Rp 250.000</span>
+                        <PaymentStatusBadge status="Belum Lunas" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -543,27 +744,50 @@ export default function RedesignedLandingPage() {
               {/* Feature 5 Preview: Laporan */}
               {activeFeature === "laporan" && (
                 <div className="space-y-4 animate-fadeIn">
-                  <h4 className="font-bold text-sm text-slate-900">Ringkasan Omzet Bulan Ini</h4>
-                  <div className="h-28 bg-stone-50 rounded-xl border border-stone-200 p-3 flex items-end justify-between gap-2">
-                    <div className="bg-indigo-200 w-full h-[40%] rounded-t" />
-                    <div className="bg-indigo-300 w-full h-[65%] rounded-t" />
-                    <div className="bg-indigo-400 w-full h-[50%] rounded-t" />
-                    <div className="bg-indigo-700 w-full h-[90%] rounded-t" />
+                  <div className="flex justify-between items-center border-b border-stone-100 pb-2">
+                    <h4 className="font-bold text-sm text-slate-900">Ringkasan Kinerja Usaha</h4>
+                    <span className="text-[11px] font-bold text-indigo-700">Bulan Ini</span>
                   </div>
-                  <p className="text-xs text-center text-slate-500">Total Omzet: <strong>Rp 4.500.000</strong> (Naik dari bulan lalu)</p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Total Omzet</p>
+                      <p className="font-extrabold text-slate-900 text-sm mt-0.5">Rp 4.5jt</p>
+                    </div>
+                    <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Baju Selesai</p>
+                      <p className="font-extrabold text-slate-900 text-sm mt-0.5">18 Pcs</p>
+                    </div>
+                    <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                      <p className="text-[10px] text-slate-500">Sedang Proses</p>
+                      <p className="font-extrabold text-slate-900 text-sm mt-0.5">4 Pcs</p>
+                    </div>
+                  </div>
+                  <div className="h-20 bg-stone-50 rounded-xl border border-stone-200 p-2.5 flex items-end justify-between gap-2">
+                    <div className="bg-indigo-200 w-full h-[40%] rounded-t" title="Minggu 1" />
+                    <div className="bg-indigo-300 w-full h-[65%] rounded-t" title="Minggu 2" />
+                    <div className="bg-indigo-400 w-full h-[55%] rounded-t" title="Minggu 3" />
+                    <div className="bg-indigo-600 w-full h-[90%] rounded-t" title="Minggu 4" />
+                  </div>
                 </div>
               )}
 
               {/* Feature 6 Preview: Tracking */}
               {activeFeature === "tracking" && (
                 <div className="space-y-3 animate-fadeIn">
-                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
-                    <p className="text-xs font-bold text-slate-800">Pesanan #OR-8821 (Batik Sutra)</p>
-                    <div className="mt-3 space-y-2 text-xs">
-                      <div className="flex items-center gap-2 text-emerald-700 font-semibold"><CheckCircle2 size={14}/> Pesanan Diterima</div>
-                      <div className="flex items-center gap-2 text-emerald-700 font-semibold"><CheckCircle2 size={14}/> Pengukuran & Pemotongan</div>
-                      <div className="flex items-center gap-2 text-amber-700 font-semibold"><Clock size={14}/> Penjahitan (Sedang Berlangsung)</div>
-                      <div className="flex items-center gap-2 text-slate-400"><Clock size={14}/> Siap Diambil</div>
+                  <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                    <div className="flex justify-between items-center border-b border-stone-200 pb-2 mb-3">
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-400">Kode: OR001</span>
+                        <p className="text-xs font-bold text-slate-900">Kebaya Brukat Hijau (Ibu Ratna)</p>
+                      </div>
+                      <OrderStatusBadge status="Dijahit" />
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center gap-2 text-emerald-700 font-semibold"><CheckCircle2 size={14}/> 1. Pesanan Diterima & Dicatat</div>
+                      <div className="flex items-center gap-2 text-emerald-700 font-semibold"><CheckCircle2 size={14}/> 2. Pengukuran & Pemotongan (Dipotong)</div>
+                      <div className="flex items-center gap-2 text-blue-700 font-bold"><Scissors size={14}/> 3. Proses Penjahitan (Dijahit) — Berlangsung</div>
+                      <div className="flex items-center gap-2 text-slate-400"><Clock size={14}/> 4. Pemeriksaan & Siap Diambil</div>
+                      <div className="flex items-center gap-2 text-slate-400"><PackageCheck size={14}/> 5. Selesai & Diserahkan</div>
                     </div>
                   </div>
                 </div>
@@ -642,26 +866,26 @@ export default function RedesignedLandingPage() {
               <button 
                 onClick={() => setDashboardFilter("semua")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
-                  dashboardFilter === "semua" ? "bg-indigo-700 text-white" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
+                  dashboardFilter === "semua" ? "bg-indigo-700 text-white shadow-xs" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
                 }`}
               >
-                Semua Pesanan (24)
+                Semua Pesanan (4)
               </button>
               <button 
                 onClick={() => setDashboardFilter("dijahit")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
-                  dashboardFilter === "dijahit" ? "bg-indigo-700 text-white" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
+                  dashboardFilter === "dijahit" ? "bg-indigo-700 text-white shadow-xs" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
                 }`}
               >
-                Sedang Dijahit (8)
+                Sedang Dijahit (2)
               </button>
               <button 
                 onClick={() => setDashboardFilter("siap")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
-                  dashboardFilter === "siap" ? "bg-indigo-700 text-white" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
+                  dashboardFilter === "siap" ? "bg-indigo-700 text-white shadow-xs" : "bg-stone-100 text-slate-600 hover:bg-stone-200"
                 }`}
               >
-                Siap Diambil (5)
+                Siap Diambil (1)
               </button>
             </div>
 
@@ -670,36 +894,36 @@ export default function RedesignedLandingPage() {
               {(dashboardFilter === "semua" || dashboardFilter === "dijahit") && (
                 <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-mono text-slate-400">#OR-8821</span>
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded text-[10px]">Dijahit</span>
+                    <span className="font-extrabold text-indigo-700 text-xs">OR001</span>
+                    <OrderStatusBadge status="Dijahit" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Budi Santoso</h4>
-                  <p className="text-xs text-slate-500">Batik Sutra + Furing Tangan Panjang</p>
-                  <p className="text-xs text-indigo-700 font-semibold pt-1">Sisa Tagihan: Rp 200.000</p>
+                  <h4 className="font-bold text-sm text-slate-900">Ibu Ratna</h4>
+                  <p className="text-xs text-slate-500">Kebaya Brukat Hijau Emerald</p>
+                  <p className="text-xs text-indigo-700 font-semibold pt-1">Sisa Tagihan: Rp 250.000</p>
                 </div>
               )}
 
               {(dashboardFilter === "semua" || dashboardFilter === "dijahit") && (
                 <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-mono text-slate-400">#OR-8822</span>
-                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 font-bold rounded text-[10px]">Pemotongan</span>
+                    <span className="font-extrabold text-indigo-700 text-xs">OR002</span>
+                    <OrderStatusBadge status="Dipotong" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Ibu Siti Aminah</h4>
-                  <p className="text-xs text-slate-500">Seragam Keluarga (4 Baju)</p>
-                  <p className="text-xs text-indigo-700 font-semibold pt-1">Sisa Tagihan: Rp 600.000</p>
+                  <h4 className="font-bold text-sm text-slate-900">Bapak Budi</h4>
+                  <p className="text-xs text-slate-500">Setelan Jas Pria Formal Slim Fit</p>
+                  <p className="text-xs text-indigo-700 font-semibold pt-1">Sisa Tagihan: Rp 700.000</p>
                 </div>
               )}
 
               {(dashboardFilter === "semua" || dashboardFilter === "siap") && (
                 <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-mono text-slate-400">#OR-8823</span>
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">Siap Diambil</span>
+                    <span className="font-extrabold text-indigo-700 text-xs">OR003</span>
+                    <OrderStatusBadge status="Siap Diambil" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Mas Andi</h4>
-                  <p className="text-xs text-slate-500">Celana Bahan Formal Hitam</p>
-                  <p className="text-xs text-emerald-700 font-semibold pt-1">Lunas (Lengkap)</p>
+                  <h4 className="font-bold text-sm text-slate-900">Mbak Siti</h4>
+                  <p className="text-xs text-slate-500">Gaun Pesta Silk Satin Elegan</p>
+                  <p className="text-xs text-emerald-700 font-semibold pt-1">Lunas (Rp 650.000)</p>
                 </div>
               )}
             </div>
@@ -748,6 +972,7 @@ export default function RedesignedLandingPage() {
                     type="text" 
                     value={trackingCode} 
                     onChange={(e) => setTrackingCode(e.target.value)}
+                    placeholder="Contoh: OR001"
                     className="flex-1 bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-600"
                   />
                   <button 
@@ -765,33 +990,35 @@ export default function RedesignedLandingPage() {
                   <div className="flex justify-between items-start border-b border-stone-100 pb-3">
                     <div>
                       <span className="text-[10px] font-mono text-slate-400">Kode Pesanan: {trackingCode}</span>
-                      <h4 className="font-bold text-sm text-slate-900">Kemeja Batik Sutra (Pak Budi)</h4>
+                      <h4 className="font-bold text-sm text-slate-900">Kebaya Brukat Hijau (Ibu Ratna)</h4>
                     </div>
-                    <span className="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold rounded-full">
-                      ● Tahap Penjahitan
-                    </span>
+                    <OrderStatusBadge status="Dijahit" />
                   </div>
 
                   {/* Progress Line */}
                   <div className="space-y-3 relative pl-6 border-l-2 border-stone-200 ml-2 py-1 text-xs">
                     <div className="relative">
                       <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</div>
-                      <p className="font-bold text-slate-800">Pesanan Diterima & Dicatat</p>
-                      <p className="text-[10px] text-slate-400">20 Agustus 2026</p>
+                      <p className="font-bold text-slate-800">1. Pesanan Diterima & Bahan Masuk</p>
+                      <p className="text-[10px] text-slate-400">15 Agustus 2026</p>
                     </div>
                     <div className="relative">
                       <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</div>
-                      <p className="font-bold text-slate-800">Pengukuran & Pemotongan Bahan</p>
-                      <p className="text-[10px] text-slate-400">22 Agustus 2026</p>
+                      <p className="font-bold text-slate-800">2. Pengukuran & Pemotongan Pola (Dipotong)</p>
+                      <p className="text-[10px] text-slate-400">18 Agustus 2026</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-amber-100" />
-                      <p className="font-bold text-amber-800">Proses Penjahitan Baju</p>
-                      <p className="text-[10px] text-amber-600 font-medium">Sedang Dikembangkan oleh Penjahit</p>
+                      <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-blue-500 ring-4 ring-blue-100" />
+                      <p className="font-bold text-blue-800">3. Proses Penjahitan Utama & Furing (Dijahit)</p>
+                      <p className="text-[10px] text-blue-600 font-medium">Sedang Dikerjakan oleh Penjahit</p>
                     </div>
                     <div className="relative opacity-50">
                       <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-stone-300" />
-                      <p className="font-semibold text-slate-500">Pemeriksaan Akhir & Ready</p>
+                      <p className="font-semibold text-slate-500">4. Pemeriksaan Kualitas & Siap Diambil</p>
+                    </div>
+                    <div className="relative opacity-50">
+                      <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-stone-300" />
+                      <p className="font-semibold text-slate-500">5. Selesai & Diserahkan</p>
                     </div>
                   </div>
                 </div>
