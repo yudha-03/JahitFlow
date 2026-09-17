@@ -21,22 +21,23 @@ import {
   Landmark,
   Save,
   MessageSquare,
-  ShieldAlert,
-  Home // <-- Tambahan icon Home
-} from "lucide-react"; //[cite: 9]
+  Home,
+  ShieldCheck,
+  Check
+} from "lucide-react";
 
 // ============================================================================
 // MAIN SETTINGS COMPONENT
 // ============================================================================
 
 export default function SettingsPage() {
-  const pathname = "/settings";
+  const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"profil" | "notifikasi" | "rekening" | "keamanan">("profil");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Form State Dummy
+  // Form State
   const [storeName, setStoreName] = useState("Satria Tailor");
   const [ownerName, setOwnerName] = useState("Satria Pratama");
   const [phone, setPhone] = useState("081234567890");
@@ -54,12 +55,12 @@ export default function SettingsPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  }; //[cite: 9]
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     showToast("Pengaturan berhasil disimpan!");
-  }; //[cite: 9]
+  };
 
   const navigationMenu = [
     {
@@ -78,24 +79,28 @@ export default function SettingsPage() {
       ],
     },
     {
-      group: "LAINNYA",
+      group: "NAVIGASI",
       items: [
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
     },
-  ]; //[cite: 9]
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#FBF9F5] text-slate-800 flex font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
-      {/* Toast Notification */}
+      {/* Toast Feedback Notification */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-50 bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-emerald-700"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-xs border border-indigo-700"
           >
-            <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <CheckCircle2 size={16} />
+            </div>
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -105,51 +110,72 @@ export default function SettingsPage() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setIsMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar Desktop & Mobile Drawer */}
+      {/* =====================================================================
+          1. SIDEBAR (Atelier Modern Workspace - Persis Dashboard)
+          ===================================================================== */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-stone-200/90 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-atelier ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full overflow-y-auto">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-sm">
-                <Scissors className="w-5 h-5" />
+          
+          {/* Logo & Brand Header */}
+          <div className="p-5 sm:p-6 border-b border-stone-100 flex items-center justify-between">
+            <Link href="/dashboard" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-indigo-700 text-white rounded-2xl flex items-center justify-center shadow-md shadow-indigo-700/20 group-hover:bg-indigo-800 transition">
+                <Scissors size={20} className="transform -rotate-45" />
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl text-indigo-950 tracking-tight leading-none">JahitFlow</span>
-                <span className="text-xs text-slate-500 font-medium mt-1">Satria Tailor</span>
+                <span className="font-extrabold text-lg text-slate-900 tracking-tight leading-none">
+                  Jahit<span className="text-indigo-700">Flow</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mt-1">
+                  Satria Tailor
+                </span>
               </div>
             </Link>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 lg:hidden rounded-lg hover:bg-slate-100">
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-1.5 text-slate-400 hover:text-slate-600 lg:hidden rounded-lg hover:bg-stone-100"
+              aria-label="Tutup Menu"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
 
+          {/* Navigation Links */}
           <nav className="flex-1 px-4 py-6 space-y-6">
             {navigationMenu.map((group, groupIdx) => (
               <div key={groupIdx}>
-                <p className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">{group.group}</p>
+                <p className="px-3 text-[10px] font-extrabold text-slate-400 tracking-widest uppercase mb-2">
+                  {group.group}
+                </p>
                 <div className="space-y-1">
                   {group.items.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
                     return (
                       <Link
-                        key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all ${
-                          isActive ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                          isActive
+                            ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20"
+                            : "text-slate-600 hover:bg-stone-100/80 hover:text-slate-900"
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
                         <span>{item.name}</span>
                       </Link>
                     );
@@ -159,16 +185,28 @@ export default function SettingsPage() {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-            <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 shadow-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">S</div>
+          {/* User Profile Card & Logout */}
+          <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
+            <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
+                  S
+                </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate leading-tight">Satria</p>
-                  <p className="text-xs text-slate-500 font-medium truncate">Pemilik Usaha</p>
+                  <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                    Satria
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium truncate">
+                    Pemilik Usaha
+                  </p>
                 </div>
               </div>
-              <button type="button" title="Keluar" onClick={() => router.push("/login")} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+              <button
+                type="button"
+                title="Keluar"
+                onClick={() => router.push("/login")}
+                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -176,43 +214,63 @@ export default function SettingsPage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* =====================================================================
+          2. MAIN CONTENT AREA
+          ===================================================================== */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
-        {/* Header Bar */}
+        {/* Floating Glass Header Bar */}
         <motion.header
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden"
+          className="sticky top-0 z-30 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 shadow-2xs"
         >
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none shrink-0">
-              <Menu className="w-6 h-6" />
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none"
+              aria-label="Buka Menu Sidebar"
+            >
+              <Menu className="w-5 h-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">Pengaturan</h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium hidden sm:block truncate">Kelola profil usaha, integrasi notifikasi, dan keamanan akun.</p>
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+                Pengaturan
+              </h1>
+              <p className="text-xs text-slate-500 font-medium hidden sm:block truncate">
+                Kelola profil atelier, integrasi notifikasi WhatsApp, dan data rekening toko.
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+            {/* Tombol Kembali ke Beranda */}
             <Link
               href="/"
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
             >
-              <Home className="w-4 h-4 shrink-0" />
+              <Home className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Kembali ke Beranda</span>
               <span className="sm:hidden">Beranda</span>
             </Link>
 
-            <button type="button" className="relative p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none shrink-0">
-              <Bell className="w-5 h-5" />
+            <button
+              type="button"
+              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
+              aria-label="Notifikasi"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             </button>
-            <div className="flex items-center gap-2 sm:gap-2.5 pl-2 sm:pl-3 border-l border-slate-200 shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">S</div>
-              <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+
+            <div className="flex items-center gap-2 pl-2 border-l border-stone-200 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
+                S
+              </div>
+              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
+                Satria Tailor
+              </span>
             </div>
           </div>
         </motion.header>
@@ -228,94 +286,106 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             
             {/* Sidebar Tabs */}
-            <div className="md:col-span-1 space-y-1">
+            <div className="md:col-span-1 space-y-2">
               <button
                 onClick={() => setActiveTab("profil")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
-                  activeTab === "profil" ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "bg-white text-slate-600 hover:bg-slate-100"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all shadow-2xs ${
+                  activeTab === "profil" 
+                    ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20" 
+                    : "bg-white text-slate-600 hover:bg-stone-100 border border-stone-200/80"
                 }`}
               >
-                <Store className="w-4 h-4" /> Profil Usaha
+                <Store className="w-4 h-4 shrink-0" />
+                <span>Profil Usaha</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("notifikasi")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
-                  activeTab === "notifikasi" ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "bg-white text-slate-600 hover:bg-slate-100"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all shadow-2xs ${
+                  activeTab === "notifikasi" 
+                    ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20" 
+                    : "bg-white text-slate-600 hover:bg-stone-100 border border-stone-200/80"
                 }`}
               >
-                <MessageSquare className="w-4 h-4" /> WhatsApp / Notifikasi
+                <MessageSquare className="w-4 h-4 shrink-0" />
+                <span>Notifikasi WA</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("rekening")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
-                  activeTab === "rekening" ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "bg-white text-slate-600 hover:bg-slate-100"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all shadow-2xs ${
+                  activeTab === "rekening" 
+                    ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20" 
+                    : "bg-white text-slate-600 hover:bg-stone-100 border border-stone-200/80"
                 }`}
               >
-                <Landmark className="w-4 h-4" /> Rekening Bank
+                <Landmark className="w-4 h-4 shrink-0" />
+                <span>Rekening Bank</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("keamanan")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
-                  activeTab === "keamanan" ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "bg-white text-slate-600 hover:bg-slate-100"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all shadow-2xs ${
+                  activeTab === "keamanan" 
+                    ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20" 
+                    : "bg-white text-slate-600 hover:bg-stone-100 border border-stone-200/80"
                 }`}
               >
-                <Lock className="w-4 h-4" /> Keamanan
+                <Lock className="w-4 h-4 shrink-0" />
+                <span>Keamanan</span>
               </button>
             </div>
 
             {/* Tab Form Panels */}
             <div className="md:col-span-3">
-              <form onSubmit={handleSave} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+              <form onSubmit={handleSave} className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200/80 shadow-2xs space-y-6">
                 
                 {/* TAB 1: PROFIL USAHA */}
                 {activeTab === "profil" && (
                   <div className="space-y-5">
-                    <div>
-                      <h3 className="text-lg font-extrabold text-slate-900">Profil Usaha Jahitan</h3>
-                      <p className="text-xs text-slate-500 font-medium">Informasi ini akan dicetak pada nota/kwitansi pelanggan.</p>
+                    <div className="border-b border-stone-100 pb-4">
+                      <h2 className="text-base font-extrabold text-slate-900">Profil Usaha Jahitan</h2>
+                      <p className="text-xs text-slate-400 font-medium">Informasi ini akan dicetak pada nota resi dan kwitansi pelanggan.</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Usaha / Toko</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Nama Usaha / Toko</label>
                         <input
                           type="text"
                           value={storeName}
                           onChange={(e) => setStoreName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Pemilik</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Nama Pemilik</label>
                         <input
                           type="text"
                           value={ownerName}
                           onChange={(e) => setOwnerName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor WhatsApp Resmi Toko</label>
+                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Nomor WhatsApp Resmi Toko</label>
                       <input
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Alamat Toko</label>
+                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Alamat Lengkap Workshop / Toko</label>
                       <textarea
                         rows={3}
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 resize-none"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50 resize-none"
                       />
                     </div>
                   </div>
@@ -324,35 +394,35 @@ export default function SettingsPage() {
                 {/* TAB 2: NOTIFIKASI WHATSAPP */}
                 {activeTab === "notifikasi" && (
                   <div className="space-y-5">
-                    <div>
-                      <h3 className="text-lg font-extrabold text-slate-900">Pengaturan Notifikasi WhatsApp</h3>
-                      <p className="text-xs text-slate-500 font-medium">Atur pengiriman pesan otomatis ke nomor HP pelanggan.</p>
+                    <div className="border-b border-stone-100 pb-4">
+                      <h2 className="text-base font-extrabold text-slate-900">Pengaturan Notifikasi WhatsApp</h2>
+                      <p className="text-xs text-slate-400 font-medium">Atur pesan otomatis untuk konfirmasi pesanan dan informasi pengerjaan busana.</p>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">Kirim Nota Otomatis via WA</p>
-                          <p className="text-xs text-slate-500">Pelanggan akan menerima bukti bayar/DP langsung ke WA setelah transaksi dicatat.</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-2xl border border-stone-200/80 gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900">Kirim Nota Otomatis via WA</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Pelanggan akan menerima bukti nota/DP langsung ke WA setelah transaksi dicatat.</p>
                         </div>
                         <input
                           type="checkbox"
                           checked={waInvoice}
                           onChange={(e) => setWaInvoice(e.target.checked)}
-                          className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
+                          className="w-4 h-4 text-indigo-700 rounded focus:ring-indigo-600 cursor-pointer accent-indigo-700"
                         />
                       </div>
 
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">Pengingat Jahitan Selesai</p>
-                          <p className="text-xs text-slate-500">Kirim pesan otomatis saat status pesanan diubah menjadi "Selesai Siap Ambil".</p>
+                      <div className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-2xl border border-stone-200/80 gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900">Pengingat Jahitan Selesai</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Kirim pesan pemberitahuan otomatis saat status pesanan diubah menjadi "Siap Diambil".</p>
                         </div>
                         <input
                           type="checkbox"
                           checked={waReminder}
                           onChange={(e) => setWaReminder(e.target.checked)}
-                          className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
+                          className="w-4 h-4 text-indigo-700 rounded focus:ring-indigo-600 cursor-pointer accent-indigo-700"
                         />
                       </div>
                     </div>
@@ -362,43 +432,44 @@ export default function SettingsPage() {
                 {/* TAB 3: REKENING BANK */}
                 {activeTab === "rekening" && (
                   <div className="space-y-5">
-                    <div>
-                      <h3 className="text-lg font-extrabold text-slate-900">Rekening Pembayaran DP / Transfer</h3>
-                      <p className="text-xs text-slate-500 font-medium">Rekening ini digunakan saat pelanggan meminta pilihan pembayaran transfer.</p>
+                    <div className="border-b border-stone-100 pb-4">
+                      <h2 className="text-base font-extrabold text-slate-900">Rekening Pembayaran DP & Pelunasan</h2>
+                      <p className="text-xs text-slate-400 font-medium">Rekening ini tertera saat pelanggan memilih metode transfer bank atau QRIS.</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Bank</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Pilihan Bank</label>
                         <select 
                           value={bankName}
                           onChange={(e) => setBankName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900 bg-white"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         >
                           <option>BCA</option>
                           <option>Mandiri</option>
                           <option>BRI</option>
                           <option>BNI</option>
+                          <option>BSI</option>
                         </select>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor Rekening</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Nomor Rekening</label>
                         <input
                           type="text"
                           value={accountNumber}
                           onChange={(e) => setAccountNumber(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Atas Nama (A/N)</label>
+                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Atas Nama Pemilik Rekening</label>
                       <input
                         type="text"
                         value={accountHolder}
                         onChange={(e) => setAccountHolder(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                       />
                     </div>
                   </div>
@@ -407,39 +478,40 @@ export default function SettingsPage() {
                 {/* TAB 4: KEAMANAN */}
                 {activeTab === "keamanan" && (
                   <div className="space-y-5">
-                    <div>
-                      <h3 className="text-lg font-extrabold text-slate-900">Ubah Kata Sandi</h3>
-                      <p className="text-xs text-slate-500 font-medium">Amankan akun usaha Anda dengan kombinasi kata sandi yang kuat.</p>
+                    <div className="border-b border-stone-100 pb-4">
+                      <h2 className="text-base font-extrabold text-slate-900">Keamanan & Kata Sandi</h2>
+                      <p className="text-xs text-slate-400 font-medium">Amankan akun usaha Anda dengan kombinasi kata sandi terenkripsi.</p>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kata Sandi Saat Ini</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Kata Sandi Saat Ini</label>
                         <input
                           type="password"
                           placeholder="••••••••"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kata Sandi Baru</label>
+                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Kata Sandi Baru</label>
                         <input
                           type="password"
                           placeholder="••••••••"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-slate-900"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Submit Action */}
-                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                {/* Submit Action Button */}
+                <div className="pt-4 border-t border-stone-100 flex justify-end">
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-700/20 transition-all"
                   >
-                    <Save className="w-4 h-4" /> Simpan Perubahan
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Simpan Perubahan</span>
                   </button>
                 </div>
 
@@ -450,8 +522,9 @@ export default function SettingsPage() {
 
         </motion.main>
 
-        <footer className="mt-auto border-t border-slate-200/80 bg-white py-6 px-4 sm:px-8 text-center text-xs font-medium text-slate-400">
-          &copy; {new Date().getFullYear()} JahitFlow. Hak Cipta Dilindungi.
+        {/* Footer Atelier Style */}
+        <footer className="mt-auto border-t border-stone-200/80 bg-white py-6 px-4 sm:px-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+          &copy; {new Date().getFullYear()} JahitFlow Atelier &bull; Hak Cipta Dilindungi.
         </footer>
       </div>
     </div>

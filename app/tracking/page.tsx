@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link"; // Tambahan import Link
+import Link from "next/link";
 import {
   Search,
   CheckCircle2,
@@ -23,8 +23,10 @@ import {
   Tag,
   MessageSquareText,
   RefreshCw,
-  Home, // Tambahan icon Home
+  Home,
   LucideIcon,
+  ShieldCheck,
+  ArrowRight
 } from "lucide-react";
 
 // --- TYPE DEFINITIONS ---
@@ -134,7 +136,7 @@ export default function TrackingPage(): React.ReactElement {
   const [showIntro, setShowIntro] = useState<boolean>(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowIntro(false), 1400);
+    const timer = setTimeout(() => setShowIntro(false), 900);
     return () => clearTimeout(timer);
   }, []);
 
@@ -154,7 +156,7 @@ export default function TrackingPage(): React.ReactElement {
         setOrderData(null);
         setSearchState("error");
       }
-    }, 500);
+    }, 450);
   }, []);
 
   const handleSearchForm = (e: React.FormEvent<HTMLFormElement>) => {
@@ -177,125 +179,136 @@ export default function TrackingPage(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      {/* OPENING ANIMATION / SPLASH SCREEN */}
+    <div className="min-h-screen bg-[#FBF9F5] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 relative overflow-x-hidden">
+      
+      {/* Ambient Lighting Orbs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[360px] bg-gradient-to-b from-indigo-200/35 via-amber-100/20 to-transparent blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-[500px] right-0 w-[450px] h-[450px] bg-indigo-100/20 blur-3xl pointer-events-none -z-10" />
+
+      {/* OPENING INTRO ANIMATION */}
       <AnimatePresence>
         {showIntro && (
           <motion.div
             key="intro"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-600"
+            transition={{ duration: 0.45, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white backdrop-blur-xl"
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="flex flex-col items-center gap-3"
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="flex flex-col items-center gap-3.5"
             >
-              <motion.div
-                initial={{ rotate: -15, scale: 0.7 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center"
-              >
-                <Scissors className="w-8 h-8 text-white" />
-              </motion.div>
-              <motion.span
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-                className="text-white font-bold text-xl tracking-tight"
-              >
-                JahitFlow
-              </motion.span>
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.35, duration: 0.9, ease: "easeInOut" }}
-                className="h-0.5 w-24 bg-white/60 rounded-full origin-left"
-              />
+              <div className="w-16 h-16 bg-indigo-600/30 border border-indigo-400/40 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                <Scissors className="w-8 h-8 text-indigo-300 transform -rotate-45" />
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-white font-extrabold text-2xl tracking-tight">
+                  Jahit<span className="text-indigo-400">Flow</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
+                  Portal Pelacakan Pesanan
+                </span>
+              </div>
+              <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-amber-400 to-transparent rounded-full animate-pulse" />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* NAVBAR */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          
-          {/* BAGIAN KIRI: Tombol Beranda & Logo */}
-          <div className="flex items-center gap-3 md:gap-4">
-            <Link 
-              href="/" 
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors border border-transparent hover:border-indigo-100"
-            >
-              <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Beranda</span>
-            </Link>
-
-            <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
-
-            <div className="flex items-center gap-2.5 text-indigo-600 font-bold text-xl tracking-tight">
-              <div className="p-1.5 sm:p-2 bg-indigo-50 rounded-xl text-indigo-600">
-                <Scissors className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="hidden xs:inline">JahitFlow</span>
-            </div>
-          </div>
-
-          {/* BAGIAN KANAN: Tombol Aksi */}
-          <div className="flex items-center gap-3">
-            {searchState === "success" && (
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+      {/* ==========================================
+          1. NAVBAR (Floating Glass Capsule)
+      ========================================== */}
+      <header className="sticky top-0 z-40 py-3.5 transition-all">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="bg-[#FBF9F5]/85 backdrop-blur-xl border border-stone-200/90 rounded-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-atelier">
+            
+            {/* Left: Home Link & Logo */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Link 
+                href="/" 
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-white hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition border border-stone-200 hover:border-indigo-200 shadow-2xs group"
               >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline">Cari Lain</span>
-              </button>
-            )}
+                <Home className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Beranda</span>
+              </Link>
+
+              <div className="w-px h-5 bg-stone-300/80 hidden sm:block" />
+
+              <Link href="/" className="flex items-center gap-2 text-indigo-700 font-extrabold text-base tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center shadow-xs">
+                  <Scissors className="w-3.5 h-3.5 transform -rotate-45" />
+                </div>
+                <span className="text-slate-900">Jahit<span className="text-indigo-700">Flow</span></span>
+              </Link>
+            </div>
+
+            {/* Right: Reset Action Button */}
+            <div className="flex items-center gap-2">
+              {searchState === "success" && (
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-3.5 py-1.5 rounded-xl transition border border-indigo-100 shadow-2xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Cari Nota Lain</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
+      {/* ==========================================
+          2. MAIN CONTENT
+      ========================================== */}
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: showIntro ? 0 : 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="max-w-4xl mx-auto px-4 py-8 md:py-12"
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="max-w-4xl mx-auto px-4 py-6 md:py-10"
       >
         {/* HERO HEADER */}
-        <div className="text-center mb-8 md:mb-12">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3">
-            <Tag className="w-3.5 h-3.5" /> Portal Pelanggan
-          </span>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-3">
-            Lacak Progress Jahitan
+        <div className="text-center mb-8 md:mb-12 space-y-3">
+          
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-indigo-200 text-indigo-800 text-xs font-bold shadow-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600" />
+            </span>
+            <Tag className="w-3 h-3 text-amber-600" />
+            <span>Portal Mandiri Pelanggan JahitFlow</span>
+          </div>
+
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Lacak Progress <span className="text-indigo-700">Jahitan Anda</span>
           </h1>
-          <p className="text-base md:text-lg text-slate-600 max-w-lg mx-auto">
-            Pantau setiap tahapan pengerjaan pakaian Anda secara real-time dan transparan.
+
+          <p className="text-sm md:text-base text-slate-600 max-w-lg mx-auto leading-relaxed">
+            Pantau setiap tahapan pengerjaan pakaian Anda secara real-time, transparan, dan akurat.
           </p>
 
-          {/* INPUT FORM */}
-          <form onSubmit={handleSearchForm} className="mt-8 max-w-xl mx-auto">
-            <div className="relative flex flex-col sm:flex-row gap-2.5 p-2 bg-white rounded-2xl shadow-lg shadow-indigo-100/50 border border-slate-200/80 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
-              <div className="relative flex-1 flex items-center pl-3">
-                <Search className="w-5 h-5 text-slate-400 mr-2 shrink-0" />
+          {/* SEARCH INPUT FORM */}
+          <form onSubmit={handleSearchForm} className="mt-7 max-w-xl mx-auto">
+            <div className="relative flex flex-col sm:flex-row gap-2.5 p-2 bg-white rounded-3xl shadow-atelier-lg border border-stone-200/90 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+              <div className="relative flex-1 flex items-center pl-3.5">
+                <Search className="w-5 h-5 text-indigo-600 mr-2.5 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Masukkan Nomor Nota (Contoh: OR001)"
-                  className="w-full h-11 bg-transparent text-slate-900 placeholder:text-slate-400 font-semibold uppercase text-base outline-none"
+                  className="w-full h-11 bg-transparent text-slate-900 placeholder:text-stone-400 font-bold uppercase text-sm sm:text-base outline-none tracking-wider"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={searchState === "loading"}
-                className="h-12 px-7 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:bg-indigo-400 shrink-0"
+                className="h-12 px-7 bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 text-white font-bold rounded-2xl transition shadow-md shadow-indigo-700/25 flex items-center justify-center gap-2 disabled:bg-indigo-400 shrink-0 text-sm active:scale-95"
               >
                 {searchState === "loading" ? (
                   <motion.div
@@ -305,22 +318,30 @@ export default function TrackingPage(): React.ReactElement {
                     <RefreshCw className="w-5 h-5" />
                   </motion.div>
                 ) : (
-                  <span>Lacak Sekarang</span>
+                  <>
+                    <span>Lacak Sekarang</span>
+                    <ArrowRight size={15} />
+                  </>
                 )}
               </button>
             </div>
 
-            {/* QUICK DEMO BADGES */}
+            {/* QUICK SAMPLE BADGES */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs text-slate-500">
-              <span>Atau coba sampel nota:</span>
-              {["OR001", "OR002", "OR003"].map((code) => (
+              <span className="font-medium">Coba sampel nota:</span>
+              {[
+                { code: "OR001", label: "Kebaya Brukat" },
+                { code: "OR002", label: "Jas Pria" },
+                { code: "OR003", label: "Gaun Pesta" },
+              ].map((sample) => (
                 <button
-                  key={code}
+                  key={sample.code}
                   type="button"
-                  onClick={() => executeSearch(code)}
-                  className="px-2.5 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded-md font-mono font-bold transition-colors"
+                  onClick={() => executeSearch(sample.code)}
+                  className="px-3 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-stone-200 rounded-xl font-mono font-bold text-xs transition shadow-2xs flex items-center gap-1.5 group"
                 >
-                  {code}
+                  <span className="text-indigo-700 group-hover:underline">{sample.code}</span>
+                  <span className="text-[10px] text-stone-400 font-sans font-normal">({sample.label})</span>
                 </button>
               ))}
             </div>
@@ -330,106 +351,137 @@ export default function TrackingPage(): React.ReactElement {
         {/* RESULTS CONTAINER */}
         <div className="min-h-[350px]">
           <AnimatePresence mode="wait">
-            {/* ERROR STATE */}
+            
+            {/* ==========================================
+                ERROR STATE
+            ========================================== */}
             {searchState === "error" && (
               <motion.div
                 key="error"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-3xl border border-red-100 p-8 md:p-12 text-center shadow-sm max-w-xl mx-auto"
+                exit={{ opacity: 0, scale: 0.96 }}
+                className="bg-white rounded-3xl border border-rose-200/90 p-8 md:p-12 text-center shadow-atelier max-w-xl mx-auto space-y-4"
               >
-                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
                   <AlertCircle className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  Nomor Nota Tidak Ditemukan
-                </h3>
-                <p className="text-slate-600 mb-6 text-sm md:text-base leading-relaxed">
-                  Kode <strong>"{searchQuery}"</strong> belum terdaftar. Pastikan tidak ada salah ketik atau hubungi penjahit jika nomor nota belum masuk ke sistem.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:underline"
-                >
-                  <ArrowLeft className="w-4 h-4" /> Kembali & Coba Lagi
-                </button>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1.5">
+                    Nomor Nota Tidak Ditemukan
+                  </h3>
+                  <p className="text-slate-600 text-sm md:text-base leading-relaxed max-w-md mx-auto">
+                    Kode <strong className="font-mono text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">"{searchQuery}"</strong> belum terdaftar di sistem.
+                  </p>
+                  <p className="text-xs text-slate-400 mt-2">
+                    Pastikan tidak ada salah ketik atau hubungi penjahit jika nomor nota baru saja dibuat.
+                  </p>
+                </div>
+                
+                <div className="pt-3 flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="inline-flex items-center gap-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 px-4 py-2.5 rounded-xl transition border border-indigo-200"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Kembali & Coba Lagi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => executeSearch("OR001")}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-stone-100 hover:bg-stone-200 px-4 py-2.5 rounded-xl transition"
+                  >
+                    Coba OR001
+                  </button>
+                </div>
               </motion.div>
             )}
 
-            {/* SUCCESS STATE */}
+            {/* ==========================================
+                SUCCESS STATE (DIGITAL ATELIER RECEIPT)
+            ========================================== */}
             {searchState === "success" && orderData && (
               <motion.div
                 key="success"
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
                 className="space-y-6"
               >
-                {/* SUMMARY HEADER CARD */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+                {/* SUMMARY HEADER CARD (DIGITAL RECEIPT TAG) */}
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-stone-200/90 shadow-atelier relative overflow-hidden">
+                  
+                  {/* Subtle Perforated Stitch Accent on Top */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-amber-400 to-indigo-600" />
+                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-stone-100">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-mono font-bold rounded-lg text-xs tracking-wider">
+                      {/* Tags Bar */}
+                      <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                        <span className="px-3 py-1 bg-indigo-50 text-indigo-800 font-mono font-extrabold rounded-lg text-xs tracking-wider border border-indigo-200/80">
                           {orderData.id}
                         </span>
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-lg text-xs flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" /> {orderData.dpAmount}
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-lg text-xs flex items-center gap-1.5 border border-emerald-200/80">
+                          <Check className="w-3.5 h-3.5 text-emerald-600" /> {orderData.dpAmount}
+                        </span>
+                        <span className="px-2.5 py-1 bg-stone-100 text-stone-600 font-semibold rounded-lg text-xs">
+                          Total: {orderData.priceTotal}
                         </span>
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">
+
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
                         {orderData.itemType}
                       </h2>
-                      <p className="text-slate-500 font-medium text-sm mt-1 flex items-center gap-2">
-                        <User className="w-4 h-4 text-slate-400" /> Pemilik: <strong className="text-slate-800">{orderData.customerName}</strong>
+
+                      <p className="text-slate-500 font-medium text-sm mt-1.5 flex items-center gap-2">
+                        <User className="w-4 h-4 text-indigo-600" /> Pemilik Pesanan: <strong className="text-slate-800 font-bold">{orderData.customerName}</strong>
                       </p>
                     </div>
 
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 min-w-[200px] text-left md:text-right">
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                    {/* Estimate Box */}
+                    <div className="bg-gradient-to-br from-[#FAF9F6] to-indigo-50/40 p-4 sm:p-5 rounded-2xl border border-stone-200/90 min-w-[210px] text-left md:text-right shadow-2xs">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Estimasi Selesai
                       </span>
-                      <p className="text-lg font-bold text-slate-900 flex items-center gap-2 md:justify-end">
-                        <Calendar className="w-4 h-4 text-indigo-600" />
+                      <p className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 md:justify-end">
+                        <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
                         {orderData.estimateDate}
                       </p>
                       {orderData.daysRemaining && (
-                        <span className="inline-block text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md mt-1">
+                        <span className="inline-block text-xs font-bold text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full mt-1.5 border border-indigo-200">
                           {orderData.daysRemaining}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* CURRENT STATUS HIGHLIGHT */}
-                  <div className="pt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  {/* CURRENT STATUS HIGHLIGHT & ACTIONS */}
+                  <div className="pt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
                     <div>
-                      <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
                         Status Pengerjaan Saat Ini
                       </span>
                       <div className="flex items-center gap-3">
-                        <span className="relative flex h-3 w-3">
+                        <span className="relative flex h-3.5 w-3.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-600" />
+                          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-indigo-600" />
                         </span>
-                        <h3 className="text-xl md:text-2xl font-bold text-indigo-600">
+                        <h3 className="text-xl md:text-2xl font-black text-indigo-700">
                           {orderData.statusText}
                         </h3>
                       </div>
                     </div>
 
                     {/* SHARE & ACTION BUTTONS */}
-                    <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="flex items-center gap-2.5 w-full md:w-auto">
                       <button
                         type="button"
                         onClick={handleCopyLink}
-                        className="flex-1 md:flex-initial px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 md:flex-initial px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-2xs active:scale-95"
                       >
-                        {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
                         <span>{copied ? "Tersalin!" : "Salin Link"}</span>
                       </button>
 
@@ -441,7 +493,7 @@ export default function TrackingPage(): React.ReactElement {
                         )}).`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 md:flex-initial px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+                        className="flex-1 md:flex-initial px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-sm shadow-emerald-600/25 flex items-center justify-center gap-2 active:scale-95 group"
                       >
                         <Phone className="w-4 h-4" />
                         <span>Hubungi Penjahit</span>
@@ -450,17 +502,28 @@ export default function TrackingPage(): React.ReactElement {
                   </div>
                 </div>
 
-                {/* TIMELINE PROGRESS SECTION */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
-                  <h4 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-indigo-600" /> Tahapan Pengerjaan
-                  </h4>
+                {/* ==========================================
+                    TIMELINE PROGRESS SECTION
+                ========================================== */}
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-stone-200/90 shadow-atelier">
+                  <div className="flex items-center justify-between mb-6 pb-3 border-b border-stone-100">
+                    <h4 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                      <Clock className="w-5 h-5 text-indigo-600" /> 
+                      <span>Tahapan Pengerjaan Pakaian</span>
+                    </h4>
+                    <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                      Langkah {orderData.currentStep + 1} dari {TIMELINE_STEPS.length}
+                    </span>
+                  </div>
 
                   {/* DESKTOP HORIZONTAL TIMELINE */}
-                  <div className="hidden md:block relative my-8">
-                    <div className="absolute top-6 left-8 right-8 h-1 bg-slate-100 -z-0 rounded-full" />
+                  <div className="hidden md:block relative my-9 px-2">
+                    {/* Background Track Line */}
+                    <div className="absolute top-6 left-8 right-8 h-1 bg-stone-200/80 -z-0 rounded-full" />
+                    
+                    {/* Active Progress Stitched Line */}
                     <div
-                      className="absolute top-6 left-8 h-1 bg-indigo-600 -z-0 transition-all duration-700 rounded-full"
+                      className="absolute top-6 left-8 h-1 bg-indigo-600 -z-0 transition-all duration-700 rounded-full shadow-sm"
                       style={{
                         width: `${(orderData.currentStep / (TIMELINE_STEPS.length - 1)) * 88}%`,
                       }}
@@ -474,21 +537,21 @@ export default function TrackingPage(): React.ReactElement {
                         const history = orderData.stepHistory[index];
 
                         return (
-                          <div key={step.title} className="flex flex-col items-center w-32 text-center">
+                          <div key={step.title} className="flex flex-col items-center w-32 text-center group">
                             <div
-                              className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 mb-3 transition-all ${
+                              className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 mb-2.5 transition-all duration-300 ${
                                 isDone
-                                  ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
+                                  ? "bg-indigo-700 border-indigo-700 text-white shadow-md shadow-indigo-700/25"
                                   : isActive
-                                  ? "bg-white border-indigo-600 text-indigo-600 ring-4 ring-indigo-100"
-                                  : "bg-white border-slate-200 text-slate-300"
+                                  ? "bg-white border-indigo-600 text-indigo-700 ring-4 ring-indigo-100 scale-110 shadow-md"
+                                  : "bg-white border-stone-200 text-stone-300"
                               }`}
                             >
                               {isDone ? <CheckCircle2 className="w-6 h-6" /> : <StepIcon className="w-5 h-5" />}
                             </div>
 
                             <span
-                              className={`text-sm font-bold block ${
+                              className={`text-xs font-extrabold block leading-tight ${
                                 isDone || isActive ? "text-slate-900" : "text-slate-400"
                               }`}
                             >
@@ -496,7 +559,7 @@ export default function TrackingPage(): React.ReactElement {
                             </span>
 
                             {history?.date && (
-                              <span className="text-[11px] font-medium text-slate-400 mt-1 block">
+                              <span className="text-[10px] font-mono text-slate-400 mt-1 block">
                                 {history.date.split(",")[0]}
                               </span>
                             )}
@@ -507,8 +570,8 @@ export default function TrackingPage(): React.ReactElement {
                   </div>
 
                   {/* MOBILE & DETAILED VERTICAL TIMELINE */}
-                  <div className="space-y-6 md:mt-10 relative">
-                    <div className="absolute top-4 bottom-4 left-6 w-0.5 bg-slate-200 md:hidden" />
+                  <div className="space-y-4 md:mt-10 relative">
+                    <div className="absolute top-4 bottom-4 left-6 w-0.5 bg-stone-200 md:hidden" />
 
                     {TIMELINE_STEPS.map((step, index) => {
                       const isDone = index < orderData.currentStep;
@@ -520,20 +583,22 @@ export default function TrackingPage(): React.ReactElement {
                       return (
                         <div
                           key={step.title}
-                          className={`relative flex items-start gap-4 p-4 rounded-2xl transition-all ${
+                          className={`relative flex items-start gap-4 p-4 rounded-2xl transition-all duration-300 border ${
                             isActive
-                              ? "bg-indigo-50/60 border border-indigo-100"
-                              : "bg-transparent"
+                              ? "bg-indigo-50/50 border-indigo-200 shadow-2xs"
+                              : isDone
+                              ? "bg-[#FAF9F6]/60 border-stone-100"
+                              : "bg-transparent border-transparent opacity-60"
                           }`}
                         >
                           {/* Step Icon */}
                           <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 z-10 border ${
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 z-10 border transition ${
                               isDone
-                                ? "bg-indigo-600 border-indigo-600 text-white"
+                                ? "bg-indigo-700 border-indigo-700 text-white shadow-xs"
                                 : isActive
-                                ? "bg-white border-indigo-600 text-indigo-600 font-bold ring-2 ring-indigo-200"
-                                : "bg-white border-slate-200 text-slate-300"
+                                ? "bg-white border-indigo-600 text-indigo-700 font-bold ring-4 ring-indigo-100 shadow-xs"
+                                : "bg-white border-stone-200 text-stone-300"
                             }`}
                           >
                             {isDone ? <Check className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
@@ -542,13 +607,20 @@ export default function TrackingPage(): React.ReactElement {
                           {/* Step Details */}
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                              <h5
-                                className={`text-base font-bold ${
-                                  isUpcoming ? "text-slate-400" : "text-slate-900"
-                                }`}
-                              >
-                                {step.title}
-                              </h5>
+                              <div className="flex items-center gap-2">
+                                <h5
+                                  className={`text-sm font-bold ${
+                                    isUpcoming ? "text-slate-400" : "text-slate-900"
+                                  }`}
+                                >
+                                  {step.title}
+                                </h5>
+                                {isActive && (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white shadow-2xs">
+                                    Berlangsung
+                                  </span>
+                                )}
+                              </div>
                               {history?.date && (
                                 <span className="text-xs text-slate-400 font-mono">
                                   {history.date}
@@ -558,9 +630,10 @@ export default function TrackingPage(): React.ReactElement {
 
                             <p className="text-xs text-slate-500 mt-0.5">{step.description}</p>
 
+                            {/* Workshop Note */}
                             {history?.note && (
-                              <div className="mt-2.5 p-3 bg-white rounded-xl border border-slate-200/60 text-xs text-slate-700 flex items-start gap-2">
-                                <MessageSquareText className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                              <div className="mt-2.5 p-3 bg-white rounded-xl border border-stone-200/80 text-xs text-slate-700 flex items-start gap-2 shadow-2xs">
+                                <MessageSquareText className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                                 <span>{history.note}</span>
                               </div>
                             )}
@@ -571,57 +644,78 @@ export default function TrackingPage(): React.ReactElement {
                   </div>
                 </div>
 
-                {/* ADDITIONAL SPECIFICATIONS CARD */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
-                  <h4 className="text-lg font-bold text-slate-900 mb-4">Detail Pakaian & Catatan Model</h4>
-                  <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    {orderData.details}
-                  </p>
+                {/* ==========================================
+                    SPECIFICATIONS & MODEL NOTES
+                ========================================== */}
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-stone-200/90 shadow-atelier space-y-3">
+                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-base">
+                    <Scissors className="w-4 h-4 text-indigo-600" />
+                    <span>Detail Pakaian & Catatan Model Busana</span>
+                  </div>
+                  <div className="bg-[#FAF9F6] p-4 sm:p-5 rounded-2xl border border-stone-200/80 text-slate-700 text-xs sm:text-sm leading-relaxed">
+                    <p>{orderData.details}</p>
+                    <div className="mt-3 pt-3 border-t border-stone-200/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                      <span>Metode: Jahit Halus Butik (Fine Stitching)</span>
+                      <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                        <CheckCircle2 size={13} /> Sesuai Rekomendasi Fiting
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {/* IDLE GUIDE STATE */}
+            {/* ==========================================
+                IDLE GUIDE STATE (WHEN NO SEARCH YET)
+            ========================================== */}
             {searchState === "idle" && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
               >
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm text-center">
-                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-extrabold text-lg mx-auto mb-4">
-                    1
+                <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-atelier text-center hover:border-indigo-300 transition group">
+                  <div className="w-12 h-12 bg-indigo-50 text-indigo-700 rounded-2xl flex items-center justify-center font-black text-lg mx-auto mb-4 border border-indigo-100 group-hover:bg-indigo-700 group-hover:text-white transition shadow-2xs">
+                    01
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">Cek Nota Pembayaran</h4>
+                  <h4 className="font-bold text-slate-900 mb-1.5 text-sm sm:text-base">Cek Nota Pembayaran</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Lihat kode nota yang tertera pada bagian atas struk pembayaran atau pesan WhatsApp penjahit.
+                    Lihat kode nota yang tertera pada bagian atas struk pembayaran atau pesan WhatsApp dari penjahit.
                   </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm text-center">
-                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-extrabold text-lg mx-auto mb-4">
-                    2
+                <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-atelier text-center hover:border-indigo-300 transition group">
+                  <div className="w-12 h-12 bg-indigo-50 text-indigo-700 rounded-2xl flex items-center justify-center font-black text-lg mx-auto mb-4 border border-indigo-100 group-hover:bg-indigo-700 group-hover:text-white transition shadow-2xs">
+                    02
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">Masukkan Kode</h4>
+                  <h4 className="font-bold text-slate-900 mb-1.5 text-sm sm:text-base">Masukkan Kode</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Ketik kode nota tersebut ke dalam kolom di atas dan tekan tombol pelacakan.
+                    Ketik kode nota (misal: <strong>OR001</strong>) ke kolom di atas dan tekan tombol pelacakan.
                   </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm text-center">
-                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-extrabold text-lg mx-auto mb-4">
-                    3
+                <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-atelier text-center hover:border-indigo-300 transition group">
+                  <div className="w-12 h-12 bg-indigo-50 text-indigo-700 rounded-2xl flex items-center justify-center font-black text-lg mx-auto mb-4 border border-indigo-100 group-hover:bg-indigo-700 group-hover:text-white transition shadow-2xs">
+                    03
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">Pantau Real-Time</h4>
+                  <h4 className="font-bold text-slate-900 mb-1.5 text-sm sm:text-base">Pantau Real-Time</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Dapatkan pembaruan langsung mulai dari pengukuran, penjahitan, hingga pakaian siap diambil.
                   </p>
                 </div>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
+
       </motion.main>
+
+      {/* FOOTER */}
+      <footer className="mt-16 py-8 border-t border-stone-200/80 text-center text-xs text-slate-400">
+        <p>© 2026 JahitFlow • Sistem Manajemen Operasional Usaha Jahit</p>
+      </footer>
+
     </div>
   );
 }

@@ -22,17 +22,21 @@ import {
   Circle,
   ScissorsLineDashed,
   Filter,
-  MoreVertical,
   Calendar,
   Eye,
   FileEdit,
   Trash2,
   Info,
-  Home // <-- DITAMBAHKAN: Import Home icon
+  Home,
+  ShoppingBag,
+  Sparkles,
+  Receipt,
+  Phone,
+  ArrowRight
 } from "lucide-react";
 
 // ============================================================================
-// TYPES & DUMMY DATA
+// TYPES & INITIAL STATE (ZERO DUMMY DATA)
 // ============================================================================
 
 type OrderStatus = "Belum Dikerjakan" | "Dipotong" | "Dijahit" | "Siap Diambil" | "Selesai";
@@ -48,40 +52,46 @@ interface OrderItem {
   paid: number;
 }
 
+// Keadaan awal kosong murni sesuai permintaan
 const INITIAL_ORDERS: OrderItem[] = [];
-const ORDER_TABS = ["Semua", "Belum Dikerjakan", "Dipotong", "Dijahit", "Siap Diambil", "Selesai"];
+
+const ORDER_TABS = ["Semua", "Belum Dikerjakan", "Dipotong", "Dijahit", "Siap Diambil", "Selesai"] as const;
 const STATUS_OPTIONS: OrderStatus[] = ["Belum Dikerjakan", "Dipotong", "Dijahit", "Siap Diambil", "Selesai"];
 
-// Helper Badge Status
+// Helper Status Badges bergaya Atelier
 const getStatusBadge = (status: OrderStatus) => {
   switch (status) {
     case "Belum Dikerjakan":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-          <Circle className="w-2.5 h-2.5 fill-slate-400 text-slate-400" /> Belum Dikerjakan
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/90 shadow-2xs">
+          <Circle className="w-2 h-2 fill-slate-400 text-slate-400" />
+          Belum Dikerjakan
         </span>
       );
     case "Dipotong":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-          <ScissorsLineDashed className="w-3.5 h-3.5 text-amber-600" /> Dipotong
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/90 shadow-2xs">
+          <ScissorsLineDashed className="w-3.5 h-3.5 text-amber-600" />
+          Dipotong
         </span>
       );
     case "Dijahit":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-          <Scissors className="w-3.5 h-3.5 text-blue-600" /> Dijahit
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200/90 shadow-2xs">
+          <Scissors className="w-3.5 h-3.5 text-blue-600" />
+          Dijahit
         </span>
       );
     case "Siap Diambil":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Siap Diambil
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          Siap Diambil
         </span>
       );
     case "Selesai":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-800 border border-purple-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200/90 shadow-2xs">
           ✓ Selesai
         </span>
       );
@@ -97,7 +107,7 @@ const formatRupiah = (angka: number) => {
 // ============================================================================
 
 export default function OrdersPage() {
-  const pathname = "/orders"; 
+  const pathname = usePathname(); 
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -113,25 +123,40 @@ export default function OrdersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
 
-  // States Form
+  // States Form Buat Pesanan Baru
   const [orderForm, setOrderForm] = useState({
-    customerName: "", phone: "", itemName: "", dueDate: "", price: "", paid: "",
+    customerName: "",
+    phone: "",
+    itemName: "",
+    dueDate: "",
+    price: "",
+    paid: "",
   });
+
+  // State Form Edit Pesanan
   const [editForm, setEditForm] = useState<OrderItem | null>(null);
 
+  // Toast Notification Trigger
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Logika Filter (Otomatis pindah tab berdasarkan activeTab)
+  // Logika Filter (Tab & Search Query)
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = 
       order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      order.code.toLowerCase().includes(searchQuery.toLowerCase());
+      order.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.itemName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Semua" || order.status === activeTab;
     return matchesSearch && matchesTab;
   });
+
+  // Hitung jumlah per status untuk badge di setiap tab
+  const getTabCount = (tabName: string) => {
+    if (tabName === "Semua") return orders.length;
+    return orders.filter(o => o.status === tabName).length;
+  };
 
   // --- FUNGSI AKSI ---
 
@@ -162,7 +187,7 @@ export default function OrdersPage() {
   };
 
   const handleOpenEdit = (order: OrderItem) => {
-    setEditForm({ ...order }); // Clone data untuk diedit
+    setEditForm({ ...order });
     setIsEditModalOpen(true);
   };
 
@@ -199,7 +224,7 @@ export default function OrdersPage() {
       ],
     },
     {
-      group: "LAINNYA",
+      group: "NAVIGASI",
       items: [
         { name: "Pengaturan", href: "/settings", icon: Settings },
       ],
@@ -207,16 +232,20 @@ export default function OrdersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#FBF9F5] text-slate-800 flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* Toast Notifikasi */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-50 bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-emerald-700"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-xs border border-indigo-700"
           >
-            <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <CheckCircle2 size={16} />
+            </div>
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -226,51 +255,73 @@ export default function OrdersPage() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setIsMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar Desktop & Mobile */}
+      {/* =====================================================================
+          1. SIDEBAR (Atelier Modern Workspace - Persis Dashboard)
+          ===================================================================== */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-white border-r border-stone-200/90 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-atelier ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full overflow-y-auto">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-sm">
-                <Scissors className="w-5 h-5" />
+          
+          {/* Logo & Brand Header */}
+          <div className="p-5 sm:p-6 border-b border-stone-100 flex items-center justify-between">
+            <Link href="/dashboard" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-indigo-700 text-white rounded-2xl flex items-center justify-center shadow-md shadow-indigo-700/20 group-hover:bg-indigo-800 transition">
+                <Scissors size={20} className="transform -rotate-45" />
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl text-indigo-950 tracking-tight leading-none">JahitFlow</span>
-                <span className="text-xs text-slate-500 font-medium mt-1">Satria Tailor</span>
+                <span className="font-extrabold text-lg text-slate-900 tracking-tight leading-none">
+                  Jahit<span className="text-indigo-700">Flow</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mt-1">
+                  Satria Tailor
+                </span>
               </div>
             </Link>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 lg:hidden rounded-lg hover:bg-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-1.5 text-slate-400 hover:text-slate-600 lg:hidden rounded-lg hover:bg-stone-100"
+              aria-label="Tutup Menu"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
 
+          {/* Navigasi Links */}
           <nav className="flex-1 px-4 py-6 space-y-6">
             {navigationMenu.map((group, groupIdx) => (
               <div key={groupIdx}>
-                <p className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">{group.group}</p>
+                <p className="px-3 text-[10px] font-extrabold text-slate-400 tracking-widest uppercase mb-2">
+                  {group.group}
+                </p>
                 <div className="space-y-1">
                   {group.items.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
                     return (
                       <Link
-                        key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all ${
-                          isActive ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                          isActive
+                            ? "bg-indigo-700 text-white shadow-md shadow-indigo-700/20"
+                            : "text-slate-600 hover:bg-stone-100/80 hover:text-slate-900"
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
                         <span>{item.name}</span>
                       </Link>
                     );
@@ -280,16 +331,28 @@ export default function OrdersPage() {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-            <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 shadow-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">S</div>
+          {/* User Profile Card & Logout */}
+          <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
+            <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
+                  S
+                </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate leading-tight">Satria</p>
-                  <p className="text-xs text-slate-500 font-medium truncate">Pemilik Usaha</p>
+                  <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                    Satria
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium truncate">
+                    Pemilik Usaha
+                  </p>
                 </div>
               </div>
-              <button type="button" title="Keluar" onClick={() => router.push("/login")} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+              <button
+                type="button"
+                title="Keluar"
+                onClick={() => router.push("/login")}
+                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -297,48 +360,68 @@ export default function OrdersPage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* =====================================================================
+          2. MAIN CONTENT AREA
+          ===================================================================== */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         
+        {/* Floating Glass Header Bar */}
         <motion.header
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 min-w-0 overflow-hidden"
+          className="sticky top-0 z-30 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 shadow-2xs"
         >
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden focus:outline-none">
-              <Menu className="w-6 h-6" />
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none"
+              aria-label="Buka Menu Sidebar"
+            >
+              <Menu className="w-5 h-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">Daftar Pesanan</h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium hidden sm:block">Kelola dan pantau progres pengerjaan jahitan.</p>
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+                Daftar Pesanan Jahitan
+              </h1>
+              <p className="text-xs text-slate-500 font-medium hidden sm:block">
+                Kelola dan pantau progres pengerjaan jahitan serta status pelunasan.
+              </p>
             </div>
           </div>
 
-          {/* Bagian Kanan Header (Icon Lonceng & Profil User) */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* DITAMBAHKAN: Tombol Kembali ke Beranda */}
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Tombol Kembali ke Beranda */}
             <Link
               href="/"
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-xs sm:text-sm font-bold shadow-sm shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
             >
-              <Home className="w-4 h-4" />
+              <Home className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Kembali ke Beranda</span>
               <span className="sm:hidden">Beranda</span>
             </Link>
 
-            <button type="button" className="relative p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors focus:outline-none">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+            <button
+              type="button"
+              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
+              aria-label="Notifikasi"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             </button>
-            <div className="flex items-center gap-2 sm:gap-2.5 pl-1.5 sm:pl-2 border-l border-slate-200 shrink-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">S</div>
-              <span className="text-sm font-bold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+
+            <div className="flex items-center gap-2 pl-2 border-l border-stone-200 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
+                S
+              </div>
+              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">Satria Tailor</span>
             </div>
           </div>
         </motion.header>
 
+        {/* Content Body */}
         <motion.main
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -346,113 +429,198 @@ export default function OrdersPage() {
           className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto"
         >
           
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
+          {/* Top Search & Primary CTA Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="relative flex-1 max-w-lg">
+              <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Cari kode atau nama..."
+                placeholder="Cari kode nota, nama pelanggan, jenis pakaian..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-bold text-slate-900 placeholder:text-slate-400 transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 transition-all shadow-2xs"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
               <button 
+                type="button"
                 onClick={() => setIsNewOrderModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition-all flex-1 sm:flex-none justify-center"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 active:scale-95 text-white rounded-2xl text-xs sm:text-sm font-extrabold shadow-md shadow-indigo-700/20 transition-all flex-1 sm:flex-none hover:-translate-y-0.5"
               >
-                <Plus className="w-4 h-4" /> Buat Pesanan
+                <Plus className="w-4 h-4" />
+                <span>Buat Pesanan Baru</span>
               </button>
             </div>
           </div>
 
-          {/* Status Tabs */}
-          <div className="bg-white p-1 rounded-2xl border border-slate-200/80 shadow-sm inline-flex overflow-x-auto w-full hide-scrollbar">
-            {ORDER_TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold transition-all flex-1 sm:flex-none ${
-                  activeTab === tab
-                    ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          {/* Status Tabs Filter */}
+          <div className="bg-white p-1.5 rounded-2xl border border-stone-200/90 shadow-atelier flex items-center gap-1 overflow-x-auto hide-scrollbar">
+            {ORDER_TABS.map((tab) => {
+              const count = getTabCount(tab);
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 shrink-0 ${
+                    isActive
+                      ? "bg-indigo-700 text-white shadow-sm shadow-indigo-700/25"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-stone-50"
+                  }`}
+                >
+                  <span>{tab}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                      isActive ? "bg-white/20 text-white" : "bg-stone-100 text-slate-600"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Desktop Table View */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden hidden md:block">
+          <div className="bg-white rounded-3xl border border-stone-200/90 shadow-atelier overflow-hidden hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-[#FAF9F6] border-b border-stone-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
                     <th className="py-4 px-6">Kode & Pelanggan</th>
-                    <th className="py-4 px-6">Detail Jahitan</th>
-                    <th className="py-4 px-6">Tgl Ambil</th>
-                    <th className="py-4 px-6">Biaya & Pembayaran</th>
-                    <th className="py-4 px-6">Status</th>
+                    <th className="py-4 px-6">Detail Busana</th>
+                    <th className="py-4 px-6">Target Ambil</th>
+                    <th className="py-4 px-6">Biaya & Status Bayar</th>
+                    <th className="py-4 px-6">Status Pengerjaan</th>
                     <th className="py-4 px-6 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm">
+                <tbody className="divide-y divide-stone-100 text-xs">
                   {filteredOrders.length > 0 ? (
-                    filteredOrders.map((order) => (
-                      <tr key={order.code} className="hover:bg-slate-50/80 transition-colors group">
-                        <td className="py-4 px-6">
-                          <p className="font-extrabold text-indigo-700 text-sm">{order.code}</p>
-                          <p className="font-bold text-slate-900 mt-1">{order.customerName}</p>
-                          <p className="text-xs text-slate-500">{order.phone}</p>
-                        </td>
-                        <td className="py-4 px-6">
-                          <p className="font-bold text-slate-800">{order.itemName}</p>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200">
-                            <Calendar className="w-3.5 h-3.5" /> {order.dueDate}
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <p className="font-bold text-slate-900">{formatRupiah(order.price)}</p>
-                          {order.paid >= order.price ? (
-                            <span className="text-[10px] font-bold text-emerald-600 uppercase bg-emerald-50 px-2 py-0.5 rounded-md mt-1 inline-block">Lunas</span>
-                          ) : order.paid > 0 ? (
-                            <span className="text-[10px] font-bold text-amber-600 uppercase bg-amber-50 px-2 py-0.5 rounded-md mt-1 inline-block">DP: {formatRupiah(order.paid)}</span>
-                          ) : (
-                            <span className="text-[10px] font-bold text-red-600 uppercase bg-red-50 px-2 py-0.5 rounded-md mt-1 inline-block">Belum Bayar</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          {getStatusBadge(order.status)}
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {/* Tombol Lihat Detail */}
-                            <button onClick={() => handleOpenView(order)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lihat Detail">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            {/* Tombol Edit */}
-                            <button onClick={() => handleOpenEdit(order)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Ubah Pesanan">
-                              <FileEdit className="w-4 h-4" />
-                            </button>
-                            {/* Tombol Hapus */}
-                            <button onClick={() => handleDeleteOrder(order.code)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Pesanan">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    filteredOrders.map((order) => {
+                      const isPaidOff = (order.paid || 0) >= (order.price || 0) && (order.price || 0) > 0;
+                      const hasDP = (order.paid || 0) > 0 && !isPaidOff;
+                      
+                      return (
+                        <tr key={order.code} className="hover:bg-stone-50/70 transition-colors group">
+                          {/* Kode & Pelanggan */}
+                          <td className="py-4 px-6">
+                            <span className="font-extrabold text-indigo-700 font-mono text-xs bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100/80 inline-block">
+                              {order.code}
+                            </span>
+                            <p className="font-bold text-slate-900 mt-1.5 text-xs">{order.customerName}</p>
+                            <p className="text-[11px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3 text-slate-400" /> {order.phone}
+                            </p>
+                          </td>
+
+                          {/* Detail Busana */}
+                          <td className="py-4 px-6 font-bold text-slate-800">
+                            {order.itemName}
+                          </td>
+
+                          {/* Target Ambil */}
+                          <td className="py-4 px-6">
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-stone-100/80 text-slate-700 font-semibold text-xs border border-stone-200">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" /> {order.dueDate}
+                            </div>
+                          </td>
+
+                          {/* Biaya & Status Bayar */}
+                          <td className="py-4 px-6">
+                            <p className="font-black text-slate-900 text-xs">{formatRupiah(order.price)}</p>
+                            {isPaidOff ? (
+                              <span className="text-[10px] font-extrabold text-emerald-700 uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80 mt-1 inline-block">
+                                ✓ Lunas
+                              </span>
+                            ) : hasDP ? (
+                              <span className="text-[10px] font-extrabold text-amber-700 uppercase bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 mt-1 inline-block">
+                                DP: {formatRupiah(order.paid)}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-extrabold text-rose-600 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/80 mt-1 inline-block">
+                                Belum Bayar
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Status Pengerjaan */}
+                          <td className="py-4 px-6">
+                            {getStatusBadge(order.status)}
+                          </td>
+
+                          {/* Aksi Cepat */}
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Lihat Detail */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenView(order)}
+                                className="p-2 text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors border border-transparent hover:border-indigo-100"
+                                title="Lihat Resi Detail"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              {/* Edit Status */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEdit(order)}
+                                className="p-2 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-xl transition-colors border border-transparent hover:border-amber-100"
+                                title="Ubah Status & Data"
+                              >
+                                <FileEdit className="w-4 h-4" />
+                              </button>
+                              {/* Hapus */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteOrder(order.code)}
+                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border border-transparent hover:border-rose-100"
+                                title="Hapus Pesanan"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">
-                        <div className="flex flex-col items-center justify-center">
-                          <Search className="w-10 h-10 text-slate-300 mb-3" />
-                          <p>Tidak ada pesanan yang sesuai dengan filter atau pencarian.</p>
+                      <td colSpan={6} className="py-16 text-center">
+                        <div className="max-w-md mx-auto space-y-3">
+                          <div className="w-14 h-14 mx-auto rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 shadow-2xs">
+                            <Scissors className="w-6 h-6 text-indigo-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+                              {searchQuery ? "Tidak ada pesanan yang sesuai pencarian" : "Belum Ada Pesanan Tersimpan"}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {searchQuery 
+                                ? `Hasil untuk "${searchQuery}" tidak ditemukan pada tab ${activeTab}.`
+                                : "Daftar pesanan jahit masih kosong. Mulai catat pesanan baru untuk memantau status pengerjaan."}
+                            </p>
+                          </div>
+                          {!searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setIsNewOrderModalOpen(true)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-700/20 active:scale-95 transition"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Catat Pesanan Baru
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -462,47 +630,94 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          {/* Mobile Card View */}
-          <div className="space-y-4 md:hidden">
+          {/* Mobile Card List View */}
+          <div className="space-y-3 md:hidden">
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
-                <div key={order.code} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3 relative">
-                  <button onClick={() => handleDeleteOrder(order.code)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1 bg-white rounded-md">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 pr-8">
-                    <span className="font-extrabold text-indigo-700 text-sm bg-indigo-50 px-2.5 py-1 rounded-lg">{order.code}</span>
+                <div key={order.code} className="bg-white p-4 rounded-3xl border border-stone-200/90 shadow-atelier space-y-3 relative">
+                  <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                    <span className="font-extrabold text-indigo-700 font-mono text-xs bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
+                      {order.code}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {getStatusBadge(order.status)}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteOrder(order.code)}
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-lg"
+                        title="Hapus"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
+
+                  <div>
+                    <h4 className="font-extrabold text-slate-900 text-sm">{order.customerName}</h4>
+                    <p className="text-xs text-slate-400 font-mono">{order.phone}</p>
+                    <p className="text-xs font-semibold text-slate-700 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-100 mt-2 inline-block">
+                      {order.itemName}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 text-xs font-semibold">
+                    <div className="space-y-0.5">
+                      <span className="text-slate-400 text-[10px] font-bold uppercase">Tgl Ambil</span>
+                      <p className="flex items-center gap-1 text-slate-700 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" /> {order.dueDate}
+                      </p>
+                    </div>
+                    <div className="space-y-0.5 text-right">
+                      <span className="text-slate-400 text-[10px] font-bold uppercase">Total Biaya</span>
+                      <p className="text-slate-900 font-black">{formatRupiah(order.price)}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between gap-2 border-t border-stone-100">
                     <div>
-                      <h4 className="font-bold text-slate-900 text-base">{order.customerName}</h4>
-                      <p className="text-xs text-slate-500 mb-2">{order.phone}</p>
-                      <p className="text-sm font-semibold text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100 inline-block">{order.itemName}</p>
+                      {order.paid >= order.price && order.price > 0 ? (
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Lunas</span>
+                      ) : order.paid > 0 ? (
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">DP: {formatRupiah(order.paid)}</span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Belum Bayar</span>
+                      )}
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-semibold">
-                    <div className="space-y-1">
-                      <span className="text-slate-400 uppercase text-[10px]">Tgl Ambil</span>
-                      <p className="flex items-center gap-1 text-slate-700"><Clock className="w-3.5 h-3.5" /> {order.dueDate}</p>
-                    </div>
-                    <div className="space-y-1 text-right">
-                      <span className="text-slate-400 uppercase text-[10px]">Total Biaya</span>
-                      <p className="text-slate-900 font-bold">{formatRupiah(order.price)}</p>
-                    </div>
-                  </div>
-                  <div className="pt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100">
-                    <div>{getStatusBadge(order.status)}</div>
                     <div className="flex gap-2">
-                      <button onClick={() => handleOpenView(order)} className="px-3 py-1.5 text-center text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Detail</button>
-                      <button onClick={() => handleOpenEdit(order)} className="px-3 py-1.5 text-center text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">Update</button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenView(order)}
+                        className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition"
+                      >
+                        Resi
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(order)}
+                        className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition"
+                      >
+                        Update
+                      </button>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center">
-                <Search className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Pesanan tidak ditemukan.</p>
+              <div className="bg-white p-8 rounded-3xl border border-stone-200/90 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-stone-100 flex items-center justify-center text-slate-400">
+                  <Scissors className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Belum Ada Pesanan</h4>
+                  <p className="text-xs text-slate-400 mt-0.5">Mulai catat pesanan jahit baru.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewOrderModalOpen(true)}
+                  className="px-4 py-2 bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-700/20"
+                >
+                  + Pesanan Baru
+                </button>
               </div>
             )}
           </div>
@@ -514,72 +729,159 @@ export default function OrdersPage() {
           MODALS
       ========================================================================= */}
 
-      {/* 1. MODAL TAMBAH PESANAN */}
+      {/* 1. MODAL TAMBAH PESANAN BARU */}
       <AnimatePresence>
         {isNewOrderModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsNewOrderModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col">
-              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsNewOrderModalOpen(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-100 z-10 max-h-[92vh] flex flex-col"
+            >
+              {/* Luxury Obsidian-Indigo Modal Header */}
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-600 rounded-xl"><Plus className="w-5 h-5 text-white" /></div>
+                  <div className="p-2.5 bg-indigo-600 rounded-2xl shadow-sm text-white">
+                    <Plus className="w-5 h-5" />
+                  </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Buat Pesanan Baru</h3>
-                    <p className="text-xs text-slate-400">Masukkan data jahitan dan pelanggan</p>
+                    <h3 className="font-extrabold text-base sm:text-lg">Buat Pesanan Baru</h3>
+                    <p className="text-xs text-indigo-200">Catat pemesanan jahitan pakaian baru</p>
                   </div>
                 </div>
-                <button onClick={() => setIsNewOrderModalOpen(false)} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><X className="w-5 h-5" /></button>
+                <button
+                  type="button"
+                  onClick={() => setIsNewOrderModalOpen(false)}
+                  className="p-1.5 text-indigo-200 hover:text-white rounded-lg hover:bg-white/10 transition"
+                  aria-label="Tutup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               <form onSubmit={handleCreateOrder} className="p-6 space-y-5 overflow-y-auto flex-1">
-                {/* Info Pelanggan */}
-                <div className="space-y-4">
-                  <h4 className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2"><Users className="w-4 h-4" /> Info Pelanggan</h4>
+                {/* 1. Data Pemesan */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-extrabold text-indigo-700 uppercase tracking-wider flex items-center gap-2 border-b border-stone-200 pb-2">
+                    <Users className="w-4 h-4" /> 1. Data Pelanggan
+                  </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Pelanggan <span className="text-red-500">*</span></label>
-                      <input type="text" required placeholder="Contoh: Budi Santoso" value={orderForm.customerName} onChange={(e) => setOrderForm({ ...orderForm, customerName: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nama Pelanggan <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Budi Santoso"
+                        value={orderForm.customerName}
+                        onChange={(e) => setOrderForm({ ...orderForm, customerName: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor WhatsApp</label>
-                      <input type="tel" placeholder="081234567890" value={orderForm.phone} onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nomor WhatsApp
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="081234567890"
+                        value={orderForm.phone}
+                        onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Detail Jahitan */}
-                <div className="space-y-4 pt-2">
-                  <h4 className="text-xs font-extrabold text-amber-600 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2"><Scissors className="w-4 h-4" /> Detail Jahitan</h4>
+                {/* 2. Detail Busana */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-extrabold text-amber-700 uppercase tracking-wider flex items-center gap-2 border-b border-stone-200 pb-2">
+                    <Scissors className="w-4 h-4" /> 2. Spesifikasi Busana
+                  </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Pakaian / Jahitan <span className="text-red-500">*</span></label>
-                      <input type="text" required placeholder="Contoh: Kemeja Batik Lengan Panjang" value={orderForm.itemName} onChange={(e) => setOrderForm({ ...orderForm, itemName: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Jenis Pakaian / Model Jahitan <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Kemeja Batik Sutra Lengan Panjang"
+                        value={orderForm.itemName}
+                        onChange={(e) => setOrderForm({ ...orderForm, itemName: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal Diambil</label>
-                      <input type="date" value={orderForm.dueDate} onChange={(e) => setOrderForm({ ...orderForm, dueDate: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Target Tanggal Pengambilan
+                      </label>
+                      <input
+                        type="date"
+                        value={orderForm.dueDate}
+                        onChange={(e) => setOrderForm({ ...orderForm, dueDate: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Biaya */}
-                <div className="space-y-4 pt-2">
-                  <h4 className="text-xs font-extrabold text-emerald-600 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2"><CreditCard className="w-4 h-4" /> Biaya & Pembayaran</h4>
+                {/* 3. Biaya & DP */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-2 border-b border-stone-200 pb-2">
+                    <CreditCard className="w-4 h-4" /> 3. Biaya & Pembayaran
+                  </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Total Biaya (Rp)</label>
-                      <input type="number" placeholder="150000" value={orderForm.price} onChange={(e) => setOrderForm({ ...orderForm, price: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Total Biaya Ongkos Jahit (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="250000"
+                        value={orderForm.price}
+                        onChange={(e) => setOrderForm({ ...orderForm, price: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Sudah Dibayar / DP (Rp)</label>
-                      <input type="number" placeholder="50000" value={orderForm.paid} onChange={(e) => setOrderForm({ ...orderForm, paid: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Sudah Dibayar / Titipan DP (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="100000"
+                        value={orderForm.paid}
+                        onChange={(e) => setOrderForm({ ...orderForm, paid: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 flex items-center justify-end gap-3">
-                  <button type="button" onClick={() => setIsNewOrderModalOpen(false)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100">Batal</button>
-                  <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20">Simpan Pesanan</button>
+                <div className="pt-4 flex items-center justify-end gap-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewOrderModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-stone-100 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-indigo-700 hover:bg-indigo-800 active:scale-95 text-white shadow-md shadow-indigo-700/20 transition"
+                  >
+                    Simpan Pesanan
+                  </button>
                 </div>
               </form>
             </motion.div>
@@ -587,55 +889,112 @@ export default function OrdersPage() {
         )}
       </AnimatePresence>
 
-      {/* 2. MODAL LIHAT DETAIL */}
+      {/* 2. MODAL LIHAT DETAIL (DIGITAL ATELIER RECEIPT) */}
       <AnimatePresence>
         {isViewModalOpen && selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsViewModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col">
-              <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsViewModalOpen(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-100 z-10 max-h-[92vh] flex flex-col"
+            >
+              {/* Resi Header */}
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 to-indigo-950 text-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl"><Info className="w-5 h-5" /></div>
+                  <div className="p-2.5 bg-white/10 rounded-2xl text-amber-300">
+                    <Receipt className="w-5 h-5" />
+                  </div>
                   <div>
-                    <h3 className="font-extrabold text-lg text-slate-900">Detail Pesanan</h3>
-                    <p className="text-xs font-bold text-indigo-600">{selectedOrder.code}</p>
+                    <h3 className="font-extrabold text-base sm:text-lg">Resi Nota Jahitan</h3>
+                    <p className="text-xs text-indigo-200 font-mono font-bold">{selectedOrder.code}</p>
                   </div>
                 </div>
-                <button onClick={() => setIsViewModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200"><X className="w-5 h-5" /></button>
+                <button
+                  type="button"
+                  onClick={() => setIsViewModalOpen(false)}
+                  className="p-1.5 text-indigo-200 hover:text-white rounded-lg hover:bg-white/10 transition"
+                  aria-label="Tutup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="p-6 space-y-6 overflow-y-auto">
-                <div>
-                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Status Saat Ini</p>
+              <div className="p-6 space-y-5 overflow-y-auto">
+                {/* Status Badge */}
+                <div className="flex items-center justify-between bg-[#FAF9F6] p-4 rounded-2xl border border-stone-200/90">
+                  <div>
+                    <p className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider">Status Pengerjaan</p>
+                    <p className="text-sm font-extrabold text-slate-900 mt-0.5">{selectedOrder.status}</p>
+                  </div>
                   <div>{getStatusBadge(selectedOrder.status)}</div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+
+                {/* Grid Rincian */}
+                <div className="grid grid-cols-2 gap-4 border-t border-stone-100 pt-4 text-xs">
                   <div>
-                    <p className="text-xs text-slate-400 uppercase font-bold">Pelanggan</p>
-                    <p className="font-bold text-slate-900">{selectedOrder.customerName}</p>
-                    <p className="text-sm text-slate-500">{selectedOrder.phone}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-extrabold">Nama Pelanggan</p>
+                    <p className="font-extrabold text-slate-900 text-sm mt-0.5">{selectedOrder.customerName}</p>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">{selectedOrder.phone}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 uppercase font-bold">Tenggat Waktu</p>
-                    <p className="font-bold text-slate-900 flex items-center gap-1"><Calendar className="w-4 h-4 text-slate-400" /> {selectedOrder.dueDate}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-extrabold">Tenggat Selesai</p>
+                    <p className="font-extrabold text-slate-900 text-sm flex items-center gap-1 mt-0.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" /> {selectedOrder.dueDate}
+                    </p>
                   </div>
                   <div className="col-span-2">
-                    <p className="text-xs text-slate-400 uppercase font-bold">Detail Jahitan</p>
-                    <p className="font-bold text-slate-900 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-1">{selectedOrder.itemName}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-extrabold">Spesifikasi Jahitan</p>
+                    <p className="font-bold text-slate-900 bg-stone-50 p-3 rounded-2xl border border-stone-200/90 mt-1">
+                      {selectedOrder.itemName}
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-400 uppercase font-bold">Total Biaya</p>
-                    <p className="font-extrabold text-slate-900 text-lg">{formatRupiah(selectedOrder.price)}</p>
+                </div>
+
+                {/* Breakdown Biaya */}
+                <div className="bg-[#FAF9F6] p-4 rounded-2xl border border-stone-200/90 space-y-2 text-xs">
+                  <div className="flex justify-between font-bold text-slate-600">
+                    <span>Total Biaya Jahit:</span>
+                    <span className="font-black text-slate-900">{formatRupiah(selectedOrder.price)}</span>
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-400 uppercase font-bold">Sudah Dibayar</p>
-                    <p className="font-extrabold text-emerald-600 text-lg">{formatRupiah(selectedOrder.paid)}</p>
+                  <div className="flex justify-between font-bold text-emerald-700">
+                    <span>Sudah Dibayar (DP/Lunas):</span>
+                    <span className="font-black">{formatRupiah(selectedOrder.paid)}</span>
+                  </div>
+                  <div className="flex justify-between font-black text-slate-900 border-t border-stone-200 pt-2 text-sm">
+                    <span>Sisa Tagihan:</span>
+                    <span className="text-indigo-700">
+                      {formatRupiah(Math.max(0, selectedOrder.price - selectedOrder.paid))}
+                    </span>
                   </div>
                 </div>
               </div>
               
-              <div className="p-4 bg-slate-50 border-t border-slate-100 text-right">
-                <button onClick={() => setIsViewModalOpen(false)} className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-100">Tutup</button>
+              <div className="p-4 bg-stone-50 border-t border-stone-100 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsViewModalOpen(false);
+                    handleOpenEdit(selectedOrder);
+                  }}
+                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition"
+                >
+                  Ubah Status
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsViewModalOpen(false)}
+                  className="px-5 py-2 bg-white border border-stone-300 text-slate-700 rounded-xl font-bold text-xs hover:bg-stone-100 transition shadow-2xs"
+                >
+                  Tutup
+                </button>
               </div>
             </motion.div>
           </div>
@@ -645,70 +1004,150 @@ export default function OrdersPage() {
       {/* 3. MODAL UBAH / EDIT PESANAN */}
       <AnimatePresence>
         {isEditModalOpen && editForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col">
-              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-100 z-10 max-h-[92vh] flex flex-col"
+            >
+              {/* Header Amber-Obsidian */}
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-950 to-amber-950 text-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-500 rounded-xl"><FileEdit className="w-5 h-5 text-white" /></div>
+                  <div className="p-2.5 bg-amber-600 rounded-2xl text-white shadow-sm">
+                    <FileEdit className="w-5 h-5" />
+                  </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Ubah Data Pesanan</h3>
-                    <p className="text-xs text-amber-200">ID: {editForm.code}</p>
+                    <h3 className="font-extrabold text-base sm:text-lg">Ubah Data Pesanan</h3>
+                    <p className="text-xs text-amber-200 font-mono">Kode: {editForm.code}</p>
                   </div>
                 </div>
-                <button onClick={() => setIsEditModalOpen(false)} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><X className="w-5 h-5" /></button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="p-1.5 text-amber-200 hover:text-white rounded-lg hover:bg-white/10 transition"
+                  aria-label="Tutup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               <form onSubmit={handleUpdateOrder} className="p-6 space-y-5 overflow-y-auto flex-1">
                 
-                {/* --- UPDATE STATUS (Ini yang bikin pindah tab) --- */}
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl mb-4">
-                  <label className="block text-xs font-extrabold text-amber-800 uppercase mb-2">Update Status Pengerjaan</label>
+                {/* Selektor Status Pengerjaan (Highlight) */}
+                <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl">
+                  <label className="block text-xs font-extrabold text-amber-900 uppercase mb-2">
+                    Update Status Pengerjaan Jahitan
+                  </label>
                   <select 
                     value={editForm.status} 
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value as OrderStatus })}
-                    className="w-full px-4 py-3 rounded-xl border border-amber-200 bg-white text-slate-900 font-bold focus:ring-2 focus:ring-amber-500 outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-amber-300 bg-white text-slate-900 font-extrabold text-xs sm:text-sm focus:ring-4 focus:ring-amber-500/20 outline-none shadow-2xs"
                   >
                     {STATUS_OPTIONS.map((status) => (
                       <option key={status} value={status}>{status}</option>
                     ))}
                   </select>
-                  <p className="text-xs text-amber-600 mt-2 font-medium">*Mengubah status akan memindahkan pesanan ke tab yang sesuai.</p>
+                  <p className="text-[11px] text-amber-700 mt-2 font-medium">
+                    *Mengubah status di atas otomatis memindahkan pesanan ke tab status yang sesuai.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Pelanggan</label>
-                    <input type="text" required value={editForm.customerName} onChange={(e) => setEditForm({ ...editForm, customerName: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Nama Pelanggan
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.customerName}
+                      onChange={(e) => setEditForm({ ...editForm, customerName: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor WhatsApp</label>
-                    <input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Nomor WhatsApp
+                    </label>
+                    <input
+                      type="tel"
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Detail Jahitan</label>
-                    <input type="text" required value={editForm.itemName} onChange={(e) => setEditForm({ ...editForm, itemName: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Jenis Pakaian / Model
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.itemName}
+                      onChange={(e) => setEditForm({ ...editForm, itemName: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal Diambil</label>
-                    <input type="date" value={editForm.dueDate} onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Tanggal Target Ambil
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.dueDate}
+                      onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-stone-100 pt-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Total Biaya (Rp)</label>
-                    <input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Total Biaya (Rp)
+                    </label>
+                    <input
+                      type="number"
+                      value={editForm.price}
+                      onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Sudah Dibayar (Rp)</label>
-                    <input type="number" value={editForm.paid} onChange={(e) => setEditForm({ ...editForm, paid: Number(e.target.value) })} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Sudah Dibayar (Rp)
+                    </label>
+                    <input
+                      type="number"
+                      value={editForm.paid}
+                      onChange={(e) => setEditForm({ ...editForm, paid: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none text-xs sm:text-sm font-bold text-slate-900 shadow-2xs"
+                    />
                   </div>
                 </div>
 
-                <div className="pt-6 flex items-center justify-end gap-3">
-                  <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100">Batal</button>
-                  <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20">Simpan Perubahan</button>
+                <div className="pt-4 flex items-center justify-end gap-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-stone-100 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-amber-600 hover:bg-amber-700 active:scale-95 text-white shadow-md shadow-amber-600/20 transition"
+                  >
+                    Simpan Perubahan
+                  </button>
                 </div>
               </form>
             </motion.div>
