@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
   LayoutDashboard,
@@ -114,6 +116,7 @@ export default function OrdersPage() {
 
   // States Utama
   const [orders, setOrders] = useState<OrderItem[]>(INITIAL_ORDERS);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Semua");
   
@@ -142,6 +145,22 @@ export default function OrdersPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const loadOrders = async () => {
+    try {
+      setIsLoading(true);
+      const data = await api.orders.getAll();
+      setOrders(data);
+    } catch (err) {
+      console.error("Gagal memuat pesanan:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
   // Logika Filter (Tab & Search Query)
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = 
@@ -160,25 +179,27 @@ export default function OrdersPage() {
 
   // --- FUNGSI AKSI ---
 
-  const handleCreateOrder = (e: React.FormEvent) => {
+  const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderForm.customerName || !orderForm.itemName) return;
 
-    const newOrder: OrderItem = {
-      code: `ORD-${String(orders.length + 1).padStart(3, '0')}`,
-      customerName: orderForm.customerName,
-      phone: orderForm.phone || "-",
-      itemName: orderForm.itemName,
-      dueDate: orderForm.dueDate || "Belum ditentukan",
-      status: "Belum Dikerjakan",
-      price: Number(orderForm.price) || 0,
-      paid: Number(orderForm.paid) || 0,
-    };
+    try {
+      const created = await api.orders.create({
+        customerName: orderForm.customerName.trim(),
+        phone: orderForm.phone.trim() || "-",
+        itemName: orderForm.itemName.trim(),
+        dueDate: orderForm.dueDate || "Belum ditentukan",
+        price: Number(orderForm.price) || 0,
+        paid: Number(orderForm.paid) || 0,
+      });
 
-    setOrders([newOrder, ...orders]);
-    setIsNewOrderModalOpen(false);
-    setOrderForm({ customerName: "", phone: "", itemName: "", dueDate: "", price: "", paid: "" });
-    showToast(`Pesanan ${newOrder.code} berhasil dibuat!`);
+      await loadOrders();
+      setIsNewOrderModalOpen(false);
+      setOrderForm({ customerName: "", phone: "", itemName: "", dueDate: "", price: "", paid: "" });
+      showToast(`Pesanan ${created.code} berhasil disimpan ke database!`);
+    } catch (err: any) {
+      showToast(`Gagal membuat pesanan: ${err.message}`);
+    }
   };
 
   const handleOpenView = (order: OrderItem) => {
@@ -191,19 +212,42 @@ export default function OrdersPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateOrder = (e: React.FormEvent) => {
+  const handleUpdateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editForm) return;
 
-    setOrders(orders.map((o) => (o.code === editForm.code ? editForm : o)));
-    setIsEditModalOpen(false);
-    showToast(`Pesanan ${editForm.code} berhasil diperbarui!`);
+    try {
+      const target = orders.find(o => o.code === editForm.code);
+      const idOrCode = (target as any)?.id || editForm.code;
+      await api.orders.update(idOrCode, {
+        customerName: editForm.customerName,
+        phone: editForm.phone,
+        itemName: editForm.itemName,
+        dueDate: editForm.dueDate,
+        status: editForm.status,
+        price: Number(editForm.price) || 0,
+        paid: Number(editForm.paid) || 0,
+      });
+
+      await loadOrders();
+      setIsEditModalOpen(false);
+      showToast(`Pesanan ${editForm.code} berhasil diperbarui di database!`);
+    } catch (err: any) {
+      showToast(`Gagal memperbarui pesanan: ${err.message}`);
+    }
   };
 
-  const handleDeleteOrder = (code: string) => {
+  const handleDeleteOrder = async (code: string) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus pesanan ${code}?`)) {
-      setOrders(orders.filter((o) => o.code !== code));
-      showToast(`Pesanan ${code} berhasil dihapus!`);
+      try {
+        const target = orders.find(o => o.code === code);
+        const idOrCode = (target as any)?.id || code;
+        await api.orders.delete(idOrCode);
+        setOrders(orders.filter((o) => o.code !== code));
+        showToast(`Pesanan ${code} berhasil dihapus dari database!`);
+      } catch (err: any) {
+        showToast(`Gagal menghapus pesanan: ${err.message}`);
+      }
     }
   };
 
@@ -404,14 +448,10 @@ export default function OrdersPage() {
               <span className="hidden sm:inline">Kembali ke Beranda</span>
             </Link>
 
-            <button
-              type="button"
-              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
-              aria-label="Notifikasi"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationBell
+              orders={orders}
+              onOrderUpdated={loadOrders}
+            />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">

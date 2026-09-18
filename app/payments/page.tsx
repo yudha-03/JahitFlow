@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
   LayoutDashboard,
@@ -83,6 +85,7 @@ export default function PaymentsPage() {
 
   // States
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Semua");
   
@@ -98,12 +101,28 @@ export default function PaymentsPage() {
     paidAmount: "",
     paymentMethod: "Cash" as PaymentMethod,
     notes: "",
-  }); //[cite: 7]
+  });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  }; //[cite: 7]
+  };
+
+  const loadPayments = async () => {
+    try {
+      setIsLoading(true);
+      const data = await api.payments.getAll();
+      setTransactions(data);
+    } catch (err) {
+      console.error("Gagal memuat transaksi pembayaran:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPayments();
+  }, []);
 
   // Filter & Search Logic
   const filteredTransactions = transactions.filter((trx) => {
@@ -113,15 +132,15 @@ export default function PaymentsPage() {
       trx.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Semua" || trx.status === activeTab;
     return matchesSearch && matchesTab;
-  }); //[cite: 7]
+  });
 
   // Kalkulasi Statistik
   const totalPendapatan = transactions.reduce((acc, curr) => acc + curr.paidAmount, 0);
   const totalPiutang = transactions.reduce((acc, curr) => acc + (curr.totalAmount - curr.paidAmount), 0);
-  const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length; //[cite: 7]
+  const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length;
 
   // Handler Submit Transaksi Baru
-  const handleSavePayment = (e: React.FormEvent) => {
+  const handleSavePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.orderCode || !formData.customerName || !formData.totalAmount) {
       showToast("Harap isi semua bidang wajib!");
@@ -130,41 +149,35 @@ export default function PaymentsPage() {
 
     const total = parseFloat(formData.totalAmount) || 0;
     const paid = parseFloat(formData.paidAmount) || 0;
-    let status: PaymentStatus = "Belum Bayar";
 
-    if (paid >= total && total > 0) {
-      status = "Lunas";
-    } else if (paid > 0) {
-      status = "DP";
+    try {
+      await api.payments.create({
+        orderCode: formData.orderCode.toUpperCase().trim(),
+        customerName: formData.customerName.trim(),
+        totalAmount: total,
+        paidAmount: paid,
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes,
+      });
+
+      await loadPayments();
+      setIsPaymentModalOpen(false);
+      
+      // Reset Form
+      setFormData({
+        orderCode: "",
+        customerName: "",
+        totalAmount: "",
+        paidAmount: "",
+        paymentMethod: "Cash",
+        notes: "",
+      });
+      
+      showToast("Transaksi pembayaran berhasil dicatat ke database!");
+    } catch (err: any) {
+      showToast(`Gagal mencatat pembayaran: ${err.message}`);
     }
-
-    const newTrx: Transaction = {
-      id: `TRX-${new Date().getFullYear()}-${String(transactions.length + 1).padStart(3, '0')}`,
-      date: new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }),
-      orderCode: formData.orderCode.toUpperCase(),
-      customerName: formData.customerName,
-      totalAmount: total,
-      paidAmount: paid,
-      paymentMethod: formData.paymentMethod,
-      status: status,
-      notes: formData.notes,
-    };
-
-    setTransactions([newTrx, ...transactions]);
-    setIsPaymentModalOpen(false);
-    
-    // Reset Form
-    setFormData({
-      orderCode: "",
-      customerName: "",
-      totalAmount: "",
-      paidAmount: "",
-      paymentMethod: "Cash",
-      notes: "",
-    });
-    
-    showToast("Transaksi pembayaran berhasil dicatat!");
-  }; //[cite: 7]
+  };
 
   // Handler Lunasi Instan
   const handleLunasi = (id: string) => {
@@ -374,14 +387,7 @@ export default function PaymentsPage() {
               <span className="hidden sm:inline">Kembali ke Beranda</span>
             </Link>
 
-            <button
-              type="button"
-              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
-              aria-label="Notifikasi"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">

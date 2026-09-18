@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
   LayoutDashboard,
@@ -56,11 +58,29 @@ export default function ReportsPage() {
   const [activePeriod, setActivePeriod] = useState(REPORT_PERIODS[0]);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  const loadAnalytics = async (period: string) => {
+    try {
+      setIsLoading(true);
+      const data = await api.reports.getAnalytics(period);
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Gagal memuat laporan analitik:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics(activePeriod);
+  }, [activePeriod]);
 
   const navigationMenu = [
     {
@@ -256,14 +276,7 @@ export default function ReportsPage() {
               <span className="hidden sm:inline">Kembali ke Beranda</span>
             </Link>
 
-            <button
-              type="button"
-              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
-              aria-label="Notifikasi"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
@@ -361,10 +374,12 @@ export default function ReportsPage() {
                   <Wallet size={16} />
                 </div>
               </div>
-              <p className="text-2xl font-extrabold text-slate-900 mb-1">Rp 0</p>
+              <p className="text-2xl font-extrabold text-slate-900 mb-1">
+                {formatRupiah(analytics?.summary?.totalRevenue || 0)}
+              </p>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                <span className="inline-block w-2 h-2 rounded-full bg-slate-300" />
-                <span>Belum ada data pemasukan</span>
+                <span className={`inline-block w-2 h-2 rounded-full ${analytics?.summary?.totalRevenue ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                <span>{analytics?.summary?.totalRevenue ? 'Pemasukan tercatat' : 'Belum ada data pemasukan'}</span>
               </div>
             </motion.div>
 
@@ -384,15 +399,15 @@ export default function ReportsPage() {
                 </div>
               </div>
               <p className="text-2xl font-extrabold text-slate-900 mb-1">
-                0 <span className="text-xs font-semibold text-slate-400">Jahitan</span>
+                {analytics?.summary?.completedOrders || 0} <span className="text-xs font-semibold text-slate-400">Jahitan</span>
               </p>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                <span className="inline-block w-2 h-2 rounded-full bg-slate-300" />
-                <span>Belum ada pesanan</span>
+                <span className={`inline-block w-2 h-2 rounded-full ${analytics?.summary?.completedOrders ? 'bg-amber-500' : 'bg-slate-300'}`} />
+                <span>{analytics?.summary?.completedOrders ? 'Pesanan berhasil diselesaikan' : 'Belum ada pesanan selesai'}</span>
               </div>
             </motion.div>
 
-            {/* Total Piutang */}
+            {/* Pesanan Aktif */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -401,20 +416,22 @@ export default function ReportsPage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Total Piutang
+                  Pesanan Sedang Aktif
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shadow-2xs">
                   <CreditCard size={16} />
                 </div>
               </div>
-              <p className="text-2xl font-extrabold text-slate-900 mb-1">Rp 0</p>
+              <p className="text-2xl font-extrabold text-slate-900 mb-1">
+                {analytics?.summary?.activeOrders || 0} <span className="text-xs font-semibold text-slate-400">Jahitan</span>
+              </p>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                <span className="inline-block w-2 h-2 rounded-full bg-slate-300" />
-                <span>Belum ada piutang aktif</span>
+                <span className={`inline-block w-2 h-2 rounded-full ${analytics?.summary?.activeOrders ? 'bg-rose-500' : 'bg-slate-300'}`} />
+                <span>{analytics?.summary?.activeOrders ? 'Dalam antrean produksi' : 'Tidak ada pesanan berjalan'}</span>
               </div>
             </motion.div>
 
-            {/* Pelanggan Baru */}
+            {/* Total Pelanggan */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -423,18 +440,18 @@ export default function ReportsPage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Pelanggan Baru
+                  Total Pelanggan
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shadow-2xs">
                   <Users size={16} />
                 </div>
               </div>
               <p className="text-2xl font-extrabold text-slate-900 mb-1">
-                0 <span className="text-xs font-semibold text-slate-400">Orang</span>
+                {analytics?.summary?.totalCustomers || 0} <span className="text-xs font-semibold text-slate-400">Orang</span>
               </p>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                <span className="inline-block w-2 h-2 rounded-full bg-slate-300" />
-                <span>Belum ada pelanggan baru</span>
+                <span className={`inline-block w-2 h-2 rounded-full ${analytics?.summary?.totalCustomers ? 'bg-indigo-500' : 'bg-slate-300'}`} />
+                <span>{analytics?.summary?.totalCustomers ? 'Pelanggan terdaftar' : 'Belum ada pelanggan'}</span>
               </div>
             </motion.div>
           </div>
@@ -469,8 +486,8 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Bars or Empty State */}
-                {REVENUE_DATA.length > 0 ? (
-                  REVENUE_DATA.map((data, index) => (
+                {(analytics?.revenueData || []).length > 0 && (analytics?.revenueData || []).some((d: any) => d.amount > 0) ? (
+                  (analytics?.revenueData || []).map((data: any, index: number) => (
                     <div key={index} className="relative flex flex-col items-center justify-end h-full w-full group z-10">
                       {/* Tooltip on Hover */}
                       <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-bold py-1 px-2 rounded-lg whitespace-nowrap pointer-events-none">
@@ -478,7 +495,7 @@ export default function ReportsPage() {
                       </div>
                       {/* The Bar */}
                       <div 
-                        className={`w-full max-w-[40px] rounded-t-md transition-all duration-500 hover:opacity-80 ${index === REVENUE_DATA.length - 1 ? 'bg-indigo-700' : 'bg-indigo-200'}`}
+                        className={`w-full max-w-[40px] rounded-t-md transition-all duration-500 hover:opacity-80 ${index === (analytics?.revenueData || []).length - 1 ? 'bg-indigo-700' : 'bg-indigo-200'}`}
                         style={{ height: data.height }}
                       />
                       {/* Label */}
@@ -524,8 +541,8 @@ export default function ReportsPage() {
               </p>
               
               <div className="space-y-5 flex-1 flex flex-col justify-center">
-                {TOP_ITEMS.length > 0 ? (
-                  TOP_ITEMS.map((item, index) => (
+                {(analytics?.topItems || []).length > 0 ? (
+                  (analytics?.topItems || []).map((item: any, index: number) => (
                     <div key={index}>
                       <div className="flex justify-between items-center mb-1.5">
                         <span className="text-xs font-bold text-slate-800">{item.name}</span>
@@ -533,8 +550,8 @@ export default function ReportsPage() {
                       </div>
                       <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
                         <div 
-                          className={`h-2 rounded-full ${item.color}`} 
-                          style={{ width: `${item.percentage}%` }}
+                          className="h-2 rounded-full"
+                          style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
                         />
                       </div>
                     </div>
@@ -545,10 +562,10 @@ export default function ReportsPage() {
                       <Layers className="w-6 h-6 stroke-[1.5]" />
                     </div>
                     <p className="text-xs font-bold text-slate-700 mb-1">
-                      Belum Ada Kategori Layanan
+                      Belum Ada Data Busana Terlaris
                     </p>
-                    <p className="text-[11px] text-slate-400 max-w-[220px]">
-                      Kategori busana dan reparasi populer akan ditampilkan di sini.
+                    <p className="text-[11px] text-slate-400 max-w-xs">
+                      Statistik busana terlaris akan otomatis terkalkulasi saat pesanan pelanggan mulai dibuat.
                     </p>
                   </div>
                 )}

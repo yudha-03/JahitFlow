@@ -19,7 +19,8 @@ import {
   Scissors,
   Sparkles,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 
 // ============================================================================
@@ -458,6 +459,8 @@ const BusinessStep = ({
   onNext: () => void;
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -472,10 +475,50 @@ const BusinessStep = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
     if (!validate()) return;
-    onNext();
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("http://localhost:3001/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          businessName: formData.businessName.trim(),
+          whatsapp: formData.whatsapp.trim(),
+          businessType: formData.businessType || "Usaha Jahit",
+          address: formData.address.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setServerError(data.message || "Gagal melakukan pendaftaran.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Simpan session autentikasi di browser
+      if (typeof window !== "undefined") {
+        localStorage.setItem("jahitflow_token", data.accessToken);
+        localStorage.setItem("jahitflow_user", JSON.stringify(data.user));
+      }
+
+      setIsSubmitting(false);
+      onNext();
+    } catch (err) {
+      console.error(err);
+      setServerError("Tidak dapat terhubung ke server backend (port 3001). Pastikan backend sedang berjalan.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -493,6 +536,24 @@ const BusinessStep = ({
           Informasi ini digunakan untuk menyiapkan meja kerja khusus untuk usaha jahit Anda.
         </p>
       </div>
+
+      {serverError && (
+        <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-700 flex items-start gap-2 shadow-2xs">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+          <div className="flex-1">
+            <p>{serverError}</p>
+            {serverError.toLowerCase().includes("email") && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="mt-1.5 text-indigo-700 underline font-semibold block hover:text-indigo-800"
+              >
+                ← Kembali ke langkah 1 untuk mengubah email
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Nama Usaha */}
@@ -575,7 +636,8 @@ const BusinessStep = ({
           <button
             type="button"
             onClick={onBack}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 border border-stone-200 rounded-xl text-slate-700 bg-white hover:bg-stone-50 font-bold text-xs transition active:scale-95"
+            disabled={isSubmitting}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 border border-stone-200 rounded-xl text-slate-700 bg-white hover:bg-stone-50 font-bold text-xs transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowLeft size={16} />
             <span>Kembali</span>
@@ -583,10 +645,17 @@ const BusinessStep = ({
           
           <button
             type="submit"
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-white bg-indigo-700 hover:bg-indigo-800 font-bold text-xs shadow-md shadow-indigo-700/25 transition active:scale-95"
+            disabled={isSubmitting}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-white bg-indigo-700 hover:bg-indigo-800 disabled:bg-indigo-400 disabled:cursor-not-allowed font-bold text-xs shadow-md shadow-indigo-700/25 transition active:scale-95"
           >
-            <span>Selesaikan Pendaftaran</span>
-            <ArrowRight size={16} />
+            {isSubmitting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <span>Selesaikan Pendaftaran</span>
+                <ArrowRight size={16} />
+              </>
+            )}
           </button>
         </div>
       </form>

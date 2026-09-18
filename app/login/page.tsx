@@ -31,8 +31,9 @@ export default function LoginPage() {
   
   // State interaksi
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     
@@ -54,8 +55,44 @@ export default function LoginPage() {
       return;
     }
 
-    // Front-end saja: langsung masuk ke dashboard, tanpa pengecekan data apa pun
-    router.push("/dashboard");
+    try {
+      setIsLoading(true);
+      const res = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          rememberMe,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({
+          general: data.message || "Email atau kata sandi tidak cocok.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Simpan session autentikasi di browser
+      if (typeof window !== "undefined") {
+        localStorage.setItem("jahitflow_token", data.accessToken);
+        localStorage.setItem("jahitflow_user", JSON.stringify(data.user));
+      }
+
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setErrors({
+        general: "Gagal terhubung ke server backend (port 3001). Pastikan backend sedang berjalan.",
+      });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -269,10 +306,17 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white bg-indigo-700 hover:bg-indigo-800 shadow-md shadow-indigo-700/25 active:scale-95 font-bold text-sm transition-all mt-4 group"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white bg-indigo-700 hover:bg-indigo-800 disabled:bg-indigo-400 disabled:cursor-not-allowed shadow-md shadow-indigo-700/25 active:scale-95 font-bold text-sm transition-all mt-4 group"
               >
-                <span>Masuk ke Dashboard</span>
-                <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Masuk ke Dashboard</span>
+                    <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                  </>
+                )}
               </button>
             </form>
 

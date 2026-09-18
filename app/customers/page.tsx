@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
   LayoutDashboard,
@@ -68,6 +70,7 @@ export default function CustomersPage() {
 
   // States
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   
@@ -94,6 +97,22 @@ export default function CustomersPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const loadCustomers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await api.customers.getAll();
+      setCustomers(data);
+    } catch (err) {
+      console.error("Gagal memuat data pelanggan:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
   // Filter Pelanggan
   const filteredCustomers = customers.filter(
     (c) =>
@@ -105,44 +124,48 @@ export default function CustomersPage() {
   // Menghitung pelanggan setia (misal: order lebih dari 1)
   const loyalCustomersCount = customers.filter(c => c.totalOrders > 1).length;
 
-  const handleCreateCustomer = (e: React.FormEvent) => {
+  const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerForm.name || !customerForm.phone) return;
 
-    const newCust: Customer = {
-      id: `CUST-00${customers.length + 1}`,
-      name: customerForm.name,
-      phone: customerForm.phone,
-      address: customerForm.address || "Belum ada alamat",
-      lastMeasurementDate: "Hari ini",
-      totalOrders: 0,
-      measurements: {
-        lingkarDada: Number(customerForm.lingkarDada) || 0,
-        lingkarPinggang: Number(customerForm.lingkarPinggang) || 0,
-        lebarBahu: Number(customerForm.lebarBahu) || 0,
-        panjangBaju: Number(customerForm.panjangBaju) || 0,
-        panjangLengan: Number(customerForm.panjangLengan) || 0,
-        panjangCelana: Number(customerForm.panjangCelana) || 0,
-        lingkarPinggul: Number(customerForm.lingkarPinggul) || 0,
-      },
-    };
+    try {
+      const created = await api.customers.create({
+        name: customerForm.name.trim(),
+        phone: customerForm.phone.trim(),
+        address: customerForm.address.trim() || undefined,
+        measurements: {
+          lingkarDada: Number(customerForm.lingkarDada) || 0,
+          lingkarPinggang: Number(customerForm.lingkarPinggang) || 0,
+          lebarBahu: Number(customerForm.lebarBahu) || 0,
+          panjangBaju: Number(customerForm.panjangBaju) || 0,
+          panjangLengan: Number(customerForm.panjangLengan) || 0,
+          panjangCelana: Number(customerForm.panjangCelana) || 0,
+          lingkarPinggul: Number(customerForm.lingkarPinggul) || 0,
+        },
+      });
 
-    setCustomers([newCust, ...customers]);
-
-    setIsAddModalOpen(false);
-    setCustomerForm({
-      name: "", phone: "", address: "", lingkarDada: "", lingkarPinggang: "",
-      lebarBahu: "", panjangBaju: "", panjangLengan: "", panjangCelana: "", lingkarPinggul: ""
-    });
-    showToast(`Pelanggan ${newCust.name} berhasil ditambahkan!`);
+      await loadCustomers();
+      setIsAddModalOpen(false);
+      setCustomerForm({
+        name: "", phone: "", address: "", lingkarDada: "", lingkarPinggang: "",
+        lebarBahu: "", panjangBaju: "", panjangLengan: "", panjangCelana: "", lingkarPinggul: ""
+      });
+      showToast(`Pelanggan ${created.name} berhasil disimpan ke database!`);
+    } catch (err: any) {
+      showToast(`Gagal menyimpan pelanggan: ${err.message}`);
+    }
   };
 
   // Fungsi Hapus Pelanggan
-  const handleDeleteCustomer = (id: string, name: string) => {
-    // Validasi pencegahan penghapusan tidak sengaja
+  const handleDeleteCustomer = async (id: string, name: string) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus data pelanggan "${name}"?`)) {
-      setCustomers(customers.filter((c) => c.id !== id));
-      showToast(`Data ${name} berhasil dihapus!`);
+      try {
+        await api.customers.delete(id);
+        setCustomers(customers.filter((c) => c.id !== id));
+        showToast(`Data ${name} berhasil dihapus dari database!`);
+      } catch (err: any) {
+        showToast(`Gagal menghapus pelanggan: ${err.message}`);
+      }
     }
   };
 
@@ -336,14 +359,7 @@ export default function CustomersPage() {
               <span className="hidden sm:inline">Kembali ke Beranda</span>
             </Link>
 
-            <button
-              type="button"
-              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
-              aria-label="Notifikasi"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">

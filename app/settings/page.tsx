@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { api, getAuthUser, clearAuthSession } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
   LayoutDashboard,
@@ -23,7 +25,10 @@ import {
   MessageSquare,
   Home,
   ShieldCheck,
-  Check
+  Check,
+  Camera,
+  Upload,
+  Trash2
 } from "lucide-react";
 
 // ============================================================================
@@ -43,6 +48,10 @@ export default function SettingsPage() {
   const [phone, setPhone] = useState("081234567890");
   const [address, setAddress] = useState("Jl. Merdeka No. 45, Balikpapan, Kalimantan Timur");
   
+  // Avatar Profile Photo State
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Toggle States
   const [waInvoice, setWaInvoice] = useState(true);
   const [waReminder, setWaReminder] = useState(true);
@@ -52,14 +61,102 @@ export default function SettingsPage() {
   const [accountNumber, setAccountNumber] = useState("1234567890");
   const [accountHolder, setAccountHolder] = useState("Satria Pratama");
 
+  useEffect(() => {
+    const user = getAuthUser();
+    if (user) {
+      if (user.name) {
+        setOwnerName(user.name);
+        setAccountHolder(user.name);
+      }
+      if (user.business?.name) setStoreName(user.business.name);
+      if (user.business?.whatsapp) setPhone(user.business.whatsapp);
+      if (user.business?.address) setAddress(user.business.address);
+      if (user.avatar) setAvatarUrl(user.avatar);
+    }
+
+    if (typeof window !== "undefined") {
+      const savedAvatar = localStorage.getItem("jahitflow_avatar");
+      if (savedAvatar) setAvatarUrl(savedAvatar);
+    }
+
+    api.auth.getProfile().then((profile) => {
+      if (profile?.name) {
+        setOwnerName(profile.name);
+        setAccountHolder(profile.name);
+      }
+      if (profile?.business?.name) setStoreName(profile.business.name);
+      if (profile?.business?.whatsapp) setPhone(profile.business.whatsapp);
+      if (profile?.business?.address) setAddress(profile.business.address);
+      if (profile?.avatar) setAvatarUrl(profile.avatar);
+    }).catch(() => {});
+  }, []);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Maksimal 2MB
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Ukuran foto maksimal 2MB!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setAvatarUrl(base64);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("jahitflow_avatar", base64);
+        const user = getAuthUser();
+        if (user) {
+          user.avatar = base64;
+          localStorage.setItem("jahitflow_user", JSON.stringify(user));
+        }
+      }
+      showToast("Foto profil berhasil diperbarui!");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("jahitflow_avatar");
+      const user = getAuthUser();
+      if (user) {
+        delete user.avatar;
+        localStorage.setItem("jahitflow_user", JSON.stringify(user));
+      }
+    }
+    showToast("Foto profil dihapus.");
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    showToast("Pengaturan berhasil disimpan!");
+    if (typeof window !== "undefined") {
+      const user = getAuthUser() || {};
+      user.name = ownerName;
+      if (!user.business) user.business = {};
+      user.business.name = storeName;
+      user.business.whatsapp = phone;
+      user.business.address = address;
+      if (avatarUrl) {
+        user.avatar = avatarUrl;
+        localStorage.setItem("jahitflow_avatar", avatarUrl);
+      }
+      localStorage.setItem("jahitflow_user", JSON.stringify(user));
+    }
+    showToast("Pengaturan profil berhasil disimpan!");
+  };
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
   };
 
   const navigationMenu = [
@@ -189,12 +286,16 @@ export default function SettingsPage() {
           <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
-                  S
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0 overflow-hidden border border-indigo-200">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    ownerName ? ownerName.charAt(0).toUpperCase() : "S"
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                    Satria
+                    {ownerName || "Satria"}
                   </p>
                   <p className="text-[10px] text-slate-400 font-medium truncate">
                     Pemilik Usaha
@@ -204,7 +305,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />
@@ -256,18 +357,15 @@ export default function SettingsPage() {
               <span className="hidden sm:inline">Kembali ke Beranda</span>
             </Link>
 
-            <button
-              type="button"
-              className="relative p-2 text-slate-600 hover:bg-stone-100 rounded-xl border border-stone-200 transition focus:outline-none shadow-2xs"
-              aria-label="Notifikasi"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
-                S
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs overflow-hidden">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  ownerName ? ownerName.charAt(0).toUpperCase() : "S"
+                )}
               </div>
               <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
                 Satria Tailor
@@ -352,6 +450,71 @@ export default function SettingsPage() {
                       <h2 className="text-base font-extrabold text-slate-900">Profil Usaha Jahitan</h2>
                       <p className="text-xs text-slate-400 font-medium">Informasi ini akan dicetak pada nota resi dan kwitansi pelanggan.</p>
                     </div>
+
+                    {/* Avatar Upload Section */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-[#FAF9F6] border border-stone-200/90">
+                      <div className="relative group shrink-0">
+                        <div className="w-20 h-20 rounded-2xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-2xl overflow-hidden border-2 border-indigo-200 shadow-xs">
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={ownerName || "Foto Profil"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{ownerName ? ownerName.charAt(0).toUpperCase() : "S"}</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute inset-0 bg-slate-950/40 text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          title="Ubah Foto"
+                        >
+                          <Camera className="w-6 h-6" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xs font-bold text-slate-900">Foto Profil Penjahit</h3>
+                          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                            Opsional
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Format JPG, PNG, atau WebP (maks. 2MB). Foto ini akan ditampilkan pada avatar meja kerja dan sidebar Anda.
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-xs active:scale-95 transition flex items-center gap-1.5"
+                          >
+                            <Upload className="w-3.5 h-3.5" /> Pilih Foto
+                          </button>
+
+                          {avatarUrl && (
+                            <button
+                              type="button"
+                              onClick={handleRemoveAvatar}
+                              className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-stone-200 hover:border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Hapus
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>

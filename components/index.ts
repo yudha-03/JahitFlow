@@ -12,3 +12,6 @@ export type { OrderStatus, PaymentStatus } from "./StatusBadge";
 
 export { default as Toast } from "./Toast";
 export type { ToastProps } from "./Toast";
+
+export { default as NotificationBell } from "./NotificationBell";
+export type { NotificationBellProps, OrderAlertItem } from "./NotificationBell";
