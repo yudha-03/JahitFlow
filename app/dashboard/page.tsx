@@ -410,34 +410,35 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="sticky top-0 z-30 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 shadow-2xs"
+          className="sticky top-0 z-30 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-stone-200/80 px-3 sm:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-2.5 sm:gap-3 shadow-2xs"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none"
+              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none shrink-0"
               aria-label="Buka Menu Sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                 Meja Kerja Dashboard
               </h1>
-              <p className="text-xs text-slate-500 font-medium hidden sm:block">
+              <p className="text-xs text-slate-500 font-medium hidden sm:block truncate">
                 Pantau kondisi antrean dan operasional harian usaha jahit Anda.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link
               href="/"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
+              title="Kembali ke Beranda"
+              aria-label="Kembali ke Beranda"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Kembali ke Beranda</span>
-              <span className="sm:hidden">Beranda</span>
             </Link>
 
             <button
@@ -449,8 +450,8 @@ export default function DashboardPage() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             </button>
 
-            <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
-              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-bold flex items-center justify-center text-xs shadow-xs">
+            <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200">
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
                 S
               </div>
               <span className="text-xs font-bold text-slate-800 hidden md:inline-block">
@@ -465,44 +466,45 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full mx-auto"
+          className="p-3.5 sm:p-8 space-y-5 sm:space-y-8 max-w-7xl w-full mx-auto"
         >
           
           {/* ================================================================
               EXECUTIVE GREETING BANNER WITH SEWING MACHINE ANIMATION
               ================================================================ */}
-          <div className="bg-gradient-to-br from-indigo-950 via-slate-950 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-atelier-lg border border-indigo-800/40 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-indigo-950 via-slate-950 to-indigo-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 text-white shadow-atelier-lg border border-indigo-800/40 relative overflow-hidden">
             {/* Ambient Lighting Orbs */}
             <div className="absolute top-0 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
               
               {/* Left Column: Workshop Greeting */}
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-7 space-y-3 sm:space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 text-xs font-semibold">
                   <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow" />
-                  <span>Workshop Aktif • Meja Kerja Digital Penjahit</span>
+                  <span className="hidden sm:inline">Workshop Aktif • Meja Kerja Digital Penjahit</span>
+                  <span className="sm:hidden">Workshop Aktif JahitFlow</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
                   Selamat datang kembali, Satria 👋
                 </h2>
 
-                <p className="text-indigo-200 text-sm sm:text-base leading-relaxed max-w-xl">
+                <p className="text-indigo-200 text-xs sm:text-sm sm:text-base leading-relaxed max-w-xl">
                   Hari ini terdapat <span className="text-white font-black underline decoration-amber-400">{activeOrdersCount} pesanan aktif</span> yang sedang berjalan di bengkel jahit Anda.
                 </p>
 
                 {/* Status Chips */}
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  <span className="px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 font-bold flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5 sm:pt-1 text-xs">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 font-bold flex items-center gap-1.5 text-[11px] sm:text-xs">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     Bengkel Aktif
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-amber-300 font-bold">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-amber-300 font-bold text-[11px] sm:text-xs">
                     {sewingOrdersCount} Sedang Dijahit
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-emerald-300 font-bold">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-700/60 text-emerald-300 font-bold text-[11px] sm:text-xs">
                     {readyOrdersCount} Siap Diambil
                   </span>
                 </div>
@@ -521,23 +523,23 @@ export default function DashboardPage() {
           {/* ================================================================
               AKSI CEPAT (4 QUICK ACTIONS)
               ================================================================ */}
-          <section className="space-y-3">
+          <section className="space-y-2.5 sm:space-y-3">
             <h3 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">
               Aksi Cepat Operasional
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
               
               {/* Button 1: Pesanan Baru */}
               <button
                 type="button"
                 onClick={() => setActiveModal("new-order")}
-                className="flex items-center gap-3 p-4 bg-indigo-700 hover:bg-indigo-800 active:scale-95 text-white rounded-2xl font-bold shadow-md shadow-indigo-700/20 transition-all text-left group hover:-translate-y-0.5"
+                className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-indigo-700 hover:bg-indigo-800 active:scale-95 text-white rounded-2xl font-bold shadow-md shadow-indigo-700/20 transition-all text-left group hover:-translate-y-0.5 min-w-0"
               >
                 <div className="p-2 bg-white/20 rounded-xl group-hover:scale-110 transition-transform shrink-0">
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-xs sm:text-sm block leading-tight truncate font-extrabold">Pesanan Baru</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs sm:text-sm block leading-tight font-extrabold truncate">Pesanan Baru</span>
                   <span className="text-[10px] font-normal text-indigo-200 hidden sm:block mt-0.5">Buat orderan</span>
                 </div>
               </button>
@@ -546,13 +548,13 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("new-customer")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5"
+                className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5 min-w-0"
               >
                 <div className="p-2 bg-indigo-50 text-indigo-700 rounded-xl group-hover:scale-110 transition-transform shrink-0 border border-indigo-100">
-                  <UserPlus className="w-5 h-5" />
+                  <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-xs sm:text-sm block leading-tight truncate font-extrabold">Pelanggan Baru</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs sm:text-sm block leading-tight font-extrabold truncate">Pelanggan Baru</span>
                   <span className="text-[10px] font-normal text-slate-400 hidden sm:block mt-0.5">+ Ukuran badan</span>
                 </div>
               </button>
@@ -561,13 +563,13 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("search-size")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5"
+                className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5 min-w-0"
               >
                 <div className="p-2 bg-amber-50 text-amber-700 rounded-xl group-hover:scale-110 transition-transform shrink-0 border border-amber-100">
-                  <Ruler className="w-5 h-5" />
+                  <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-xs sm:text-sm block leading-tight truncate font-extrabold">Cari Ukuran</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs sm:text-sm block leading-tight font-extrabold truncate">Cari Ukuran</span>
                   <span className="text-[10px] font-normal text-slate-400 hidden sm:block mt-0.5">Lihat ukuran cepat</span>
                 </div>
               </button>
@@ -576,13 +578,13 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveModal("payment")}
-                className="flex items-center gap-3 p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5"
+                className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-stone-50 active:scale-95 border border-stone-200/90 text-slate-800 rounded-2xl font-bold shadow-atelier transition-all text-left group hover:-translate-y-0.5 min-w-0"
               >
                 <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl group-hover:scale-110 transition-transform shrink-0 border border-emerald-100">
-                  <Receipt className="w-5 h-5" />
+                  <Receipt className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-xs sm:text-sm block leading-tight truncate font-extrabold">Catat Bayar</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs sm:text-sm block leading-tight font-extrabold truncate">Catat Bayar</span>
                   <span className="text-[10px] font-normal text-slate-400 hidden sm:block mt-0.5">Input DP / Lunas</span>
                 </div>
               </button>
@@ -593,31 +595,31 @@ export default function DashboardPage() {
           {/* ================================================================
               RINGKASAN METRIK PESANAN
               ================================================================ */}
-          <section className="space-y-3">
+          <section className="space-y-2.5 sm:space-y-3">
             <h3 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">
               Status Pengerjaan Jahitan
             </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
               {DYNAMIC_SUMMARY_CARDS.map((card, idx) => {
                 const Icon = card.icon;
                 return (
                   <div
                     key={idx}
-                    className="bg-white p-5 rounded-3xl border border-stone-200/90 shadow-atelier hover:border-indigo-300 transition-all flex flex-col justify-between"
+                    className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-stone-200/90 shadow-atelier hover:border-indigo-300 transition-all flex flex-col justify-between"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="flex items-start sm:items-center justify-between gap-2 mb-2 sm:mb-3">
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight">
                         {card.title}
                       </span>
-                      <div className={`p-2 rounded-xl border ${card.color} shadow-2xs`}>
-                        <Icon className="w-4 h-4" />
+                      <div className={`p-1.5 sm:p-2 rounded-xl border ${card.color} shadow-2xs shrink-0`}>
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                     </div>
                     <div>
-                      <span className="text-3xl font-black text-slate-900 tracking-tight">
+                      <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                         {card.count}
                       </span>
-                      <p className="text-xs text-slate-400 font-medium mt-1">
+                      <p className="text-[11px] sm:text-xs text-slate-400 font-medium mt-0.5 sm:mt-1 truncate">
                         {card.subtitle}
                       </p>
                     </div>
@@ -630,7 +632,7 @@ export default function DashboardPage() {
           {/* ================================================================
               TABEL PESANAN BERJALAN TERBARU
               ================================================================ */}
-          <section className="space-y-3">
+          <section className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <h3 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">
                 Pesanan Berjalan Terbaru
@@ -701,29 +703,56 @@ export default function DashboardPage() {
             </div>
 
             {/* Mobile Cards */}
-            <div className="space-y-3 sm:hidden">
+            <div className="space-y-2.5 sm:hidden">
               {orders.length === 0 ? (
-                <div className="bg-white p-6 rounded-3xl border border-stone-200 text-center text-xs text-slate-400">
-                  Belum ada pesanan tersimpan.
+                <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-atelier text-center space-y-3">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center border border-indigo-100">
+                    <Scissors className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-slate-900">Belum Ada Pesanan</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Catat order pakaian pelanggan pertama Anda hari ini.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal("new-order")}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs active:scale-95 transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Buat Pesanan Baru
+                  </button>
                 </div>
               ) : (
                 orders.slice(0, 5).map((order) => (
-                  <div key={order.code} className="bg-white p-4 rounded-3xl border border-stone-200/90 shadow-atelier space-y-3">
-                    <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
-                      <span className="font-extrabold text-indigo-700 font-mono text-xs bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  <div key={order.code} className="bg-white p-4 rounded-2xl border border-stone-200/90 shadow-atelier space-y-3">
+                    <div className="flex items-center justify-between border-b border-stone-100 pb-2.5 gap-2">
+                      <span className="font-extrabold text-indigo-700 font-mono text-xs bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 shrink-0">
                         {order.code}
                       </span>
-                      {getStatusBadge(order.status)}
+                      <div className="shrink-0">
+                        {getStatusBadge(order.status)}
+                      </div>
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 text-sm">{order.customerName}</h4>
-                      <p className="text-xs text-slate-500">{order.itemName}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-bold text-slate-900 text-sm">{order.customerName}</h4>
+                        {order.phone && (
+                          <a
+                            href={`https://wa.me/${order.phone.replace(/^0/, "62")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 flex items-center gap-1 transition shrink-0"
+                          >
+                            <Phone className="w-3 h-3" /> WA
+                          </a>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-600 font-medium mt-1">{order.itemName}</p>
                     </div>
-                    <div className="flex items-center justify-between flex-wrap gap-2 pt-2 text-xs font-semibold text-slate-600">
-                      <span className="flex items-center gap-1 text-slate-500">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" /> Ambil: {order.dueDate}
+                    <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-stone-100 text-xs font-semibold text-slate-600">
+                      <span className="flex items-center gap-1 text-slate-500 text-[11px]">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" /> {order.dueDate}
                       </span>
-                      <Link href="/orders" className="text-indigo-700 font-bold flex items-center gap-0.5">
+                      <Link href="/orders" className="text-indigo-700 font-bold flex items-center gap-0.5 hover:underline">
                         Detail &rarr;
                       </Link>
                     </div>
@@ -736,7 +765,7 @@ export default function DashboardPage() {
           {/* ================================================================
               RINGKASAN KEUANGAN
               ================================================================ */}
-          <section className="space-y-3">
+          <section className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <h3 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">
                 Ringkasan Keuangan Usaha
@@ -746,35 +775,35 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div className="bg-white p-5 sm:p-7 rounded-3xl border border-stone-200/90 shadow-atelier grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-3xl border border-stone-200/90 shadow-atelier grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-indigo-600" /> Total Nilai Pesanan
+                <span className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" /> Total Nilai Pesanan
                 </span>
-                <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                <p className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">
                   Rp {(totalIncome + totalPending).toLocaleString("id-ID")}
                 </p>
-                <p className="text-xs text-slate-400 font-medium">Dari {orders.length} pesanan tercatat</p>
+                <p className="text-[11px] sm:text-xs text-slate-400 font-medium">Dari {orders.length} pesanan tercatat</p>
               </div>
 
-              <div className="space-y-1 md:border-l md:border-stone-100 md:pl-6">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Sudah Diterima (DP / Lunas)
+              <div className="space-y-1 border-t border-stone-100 pt-3.5 md:border-t-0 md:pt-0 md:border-l md:border-stone-100 md:pl-6">
+                <span className="text-[11px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" /> Sudah Diterima (DP / Lunas)
                 </span>
-                <p className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">
+                <p className="text-xl sm:text-3xl font-black text-emerald-700 tracking-tight">
                   Rp {totalIncome.toLocaleString("id-ID")}
                 </p>
-                <p className="text-xs text-emerald-600 font-medium">Dana masuk kas usaha</p>
+                <p className="text-[11px] sm:text-xs text-emerald-600 font-medium">Dana masuk kas usaha</p>
               </div>
 
-              <div className="space-y-1 md:border-l md:border-stone-100 md:pl-6">
-                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-600" /> Belum Dibayar (Pelunasan)
+              <div className="space-y-1 border-t border-stone-100 pt-3.5 md:border-t-0 md:pt-0 md:border-l md:border-stone-100 md:pl-6">
+                <span className="text-[11px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" /> Belum Dibayar (Pelunasan)
                 </span>
-                <p className="text-2xl sm:text-3xl font-black text-amber-700 tracking-tight">
+                <p className="text-xl sm:text-3xl font-black text-amber-700 tracking-tight">
                   Rp {totalPending.toLocaleString("id-ID")}
                 </p>
-                <p className="text-xs text-amber-600 font-medium">Sisa tagihan saat baju diambil</p>
+                <p className="text-[11px] sm:text-xs text-amber-600 font-medium">Sisa tagihan saat baju diambil</p>
               </div>
             </div>
           </section>
@@ -1097,8 +1126,8 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="space-y-2 max-h-64 md:max-h-80 overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                  <div className="space-y-2 max-h-44 sm:max-h-64 md:max-h-80 overflow-y-auto pr-1">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                       Daftar Pelanggan ({filteredCustomersForSize.length})
                     </p>

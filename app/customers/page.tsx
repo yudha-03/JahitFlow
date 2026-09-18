@@ -313,26 +313,27 @@ export default function CustomersPage() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none"
+              className="p-2 text-slate-600 hover:bg-stone-100 rounded-xl lg:hidden focus:outline-none shrink-0"
               aria-label="Buka Menu Sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">Data Pelanggan</h1>
-              <p className="text-xs text-slate-500 font-medium hidden sm:block">Kelola kontak pelanggan dan riwayat ukuran badan.</p>
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">Data Pelanggan</h1>
+              <p className="text-xs text-slate-500 font-medium hidden sm:block truncate">Kelola kontak pelanggan dan riwayat ukuran badan.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Tombol Kembali ke Beranda */}
             <Link
               href="/"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
+              title="Kembali ke Beranda"
+              aria-label="Kembali ke Beranda"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-stone-200 rounded-xl transition shadow-2xs"
             >
               <Home className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Kembali ke Beranda</span>
-              <span className="sm:hidden">Beranda</span>
             </Link>
 
             <button
@@ -344,7 +345,7 @@ export default function CustomersPage() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             </button>
 
-            <div className="flex items-center gap-2 pl-2 border-l border-stone-200 shrink-0">
+            <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
                 S
               </div>
@@ -358,11 +359,11 @@ export default function CustomersPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto"
+          className="p-3.5 sm:p-8 space-y-5 sm:space-y-6 max-w-7xl w-full mx-auto"
         >
           
           {/* Top Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <motion.div
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
               className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-2xs flex items-center gap-4 hover:shadow-md transition-shadow"
@@ -450,7 +451,7 @@ export default function CustomersPage() {
                       <div className="flex flex-col items-end gap-2">
                         <button 
                           onClick={() => handleDeleteCustomer(cust.id, cust.name)}
-                          className="text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          className="text-slate-400 md:text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                           title="Hapus Pelanggan"
                         >
                           <Trash2 className="w-4 h-4" />

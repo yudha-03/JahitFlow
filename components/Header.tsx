@@ -33,7 +33,7 @@ export default function Header({
           <Menu className="w-6 h-6" />
         </button>
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+          <h1 className="text-base sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
             {title}
           </h1>
           {subtitle && (

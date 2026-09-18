@@ -134,3 +134,16 @@ body {
 .shadow-atelier-lg {
   box-shadow: 0 25px 50px -12px rgba(30, 27, 75, 0.16), 0 0 1px 1px rgba(99, 102, 241, 0.1);
 }
+
+/* =======================================================
+   RESPONSIVE & TOUCH UTILITIES
+   ======================================================= */
+/* Sembunyikan scrollbar pada elemen horizontal scroll (tabs filter) */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+

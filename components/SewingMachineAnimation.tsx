@@ -14,7 +14,7 @@ export default function SewingMachineAnimation({ compact = false, className = ""
 
   return (
     <div 
-      className={`relative rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-5 sm:p-6 text-white shadow-2xl border border-indigo-700/40 overflow-hidden ${className}`}
+      className={`relative ${compact ? "rounded-2xl sm:rounded-3xl p-3.5 sm:p-5" : "rounded-3xl p-5 sm:p-6"} bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-2xl border border-indigo-700/40 overflow-hidden ${className}`}
     >
       {/* Background Ambience Glow */}
       <div className="absolute -top-12 -right-12 w-44 h-44 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -24,20 +24,20 @@ export default function SewingMachineAnimation({ compact = false, className = ""
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
 
       {/* Top Header inside Card */}
-      <div className="relative z-10 flex items-center justify-between mb-4 border-b border-indigo-800/60 pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+      <div className={`relative z-10 flex items-center justify-between ${compact ? "mb-2.5 pb-2.5" : "mb-4 pb-3"} border-b border-indigo-800/60`}>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
             <Sparkles size={14} className="animate-spin-slow" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold tracking-tight text-white">Atelier Crafting</span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 {isPlaying ? "Aktif Menjahit" : "Jeda"}
               </span>
             </div>
-            <p className="text-[10px] text-indigo-300/80">Presisi jahitan digital JahitFlow</p>
+            <p className={`text-[10px] text-indigo-300/80 truncate ${compact ? "hidden sm:block" : ""}`}>Presisi jahitan digital JahitFlow</p>
           </div>
         </div>
 
