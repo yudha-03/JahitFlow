@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { api } from "@/lib/api";
 import {
   Search,
   CheckCircle2,
@@ -140,65 +141,158 @@ export default function TrackingPage(): React.ReactElement {
     return () => clearTimeout(timer);
   }, []);
 
-  const executeSearch = useCallback((code: string) => {
+  const executeSearch = useCallback(async (code: string) => {
     const cleanCode = code.toUpperCase().trim();
     if (!cleanCode) return;
 
     setSearchQuery(cleanCode);
     setSearchState("loading");
 
-    setTimeout(() => {
-      // 1. Cek dari DUMMY_ORDERS
-      let result = DUMMY_ORDERS[cleanCode];
+    try {
+      // 1. Coba request data pelacakan dari Backend API
+      const liveData = await api.orders.track(cleanCode);
+      if (liveData && (liveData.code || liveData.order)) {
+        const orderInfo = liveData.order || liveData;
+        const totalAmount = Number(orderInfo.totalAmount ?? orderInfo.price) || 0;
+        const paidAmount = Number(orderInfo.paidAmount ?? orderInfo.paid) || 0;
+        const remaining = Math.max(0, totalAmount - paidAmount);
+        const dpText =
+          remaining === 0
+            ? `Rp ${paidAmount.toLocaleString("id-ID")} (LUNAS)`
+            : `Rp ${paidAmount.toLocaleString("id-ID")} (Sisa Rp ${remaining.toLocaleString("id-ID")})`;
 
-      // 2. Jika tidak ada di dummy, cek di data pesanan lokal (localStorage)
-      if (!result && typeof window !== "undefined") {
-        try {
-          const localStr = localStorage.getItem("jahitflow_orders");
-          if (localStr) {
-            const list = JSON.parse(localStr);
-            const found = list.find((o: any) => (o.code || "").toUpperCase() === cleanCode);
-            if (found) {
-              const stepMap: Record<string, number> = {
-                "Belum Dikerjakan": 0,
-                "Dipotong": 2,
-                "Dijahit": 3,
-                "Siap Diambil": 5,
-                "Selesai": 5,
-              };
-              const stepNum = stepMap[found.status] ?? 3;
-              result = {
-                id: found.code,
-                customerName: found.customerName,
-                itemType: found.itemName,
-                currentStep: stepNum,
-                statusText: found.status,
-                estimateDate: found.dueDate || "Sesuai Jadwal",
-                daysRemaining: "Sedang Diproses",
-                tailorPhone: found.phone || "6281234567890",
-                details: found.notes || "Pesanan aktif dalam antrean pengerjaan bengkel jahit.",
-                priceTotal: `Rp ${(Number(found.price) || 0).toLocaleString("id-ID")}`,
-                dpAmount: `Rp ${(Number(found.paid) || 0).toLocaleString("id-ID")}`,
-                stepHistory: {
-                  0: { date: "Pesanan masuk", note: "Pencatatan nota jahitan pelanggan." },
-                  [stepNum]: { date: "Status saat ini", note: `Status pengerjaan: ${found.status}` }
-                }
+        const statusMap: Record<string, number> = {
+          "Belum Dikerjakan": 0,
+          "Dipotong": 2,
+          "Dijahit": 3,
+          "Siap Diambil": 5,
+          "Selesai": 5,
+        };
+
+        const currentStep =
+          typeof liveData.currentStep === "number"
+            ? liveData.currentStep
+            : statusMap[orderInfo.status] ?? 2;
+
+        const stepHistory: Record<number, StepHistory> = {};
+        if (Array.isArray(liveData.timeline)) {
+          liveData.timeline.forEach((t: any, idx: number) => {
+            const stepIdx = typeof t.step === "number" ? t.step - 1 : idx;
+            if (t.isCompleted || t.isActive || t.isDone) {
+              stepHistory[stepIdx] = {
+                date: t.date || (t.isCompleted ? "Selesai" : "Sedang diproses"),
+                note: t.desc || t.note,
               };
             }
-          }
-        } catch {
-          // fallback
+          });
         }
-      }
 
-      if (result) {
+        const result: Order = {
+          id: orderInfo.code || orderInfo.orderNumber || cleanCode,
+          customerName: orderInfo.customerName || "Pelanggan",
+          itemType: orderInfo.itemName || orderInfo.garmentType || "Busana Jahitan",
+          currentStep: Math.min(5, Math.max(0, currentStep)),
+          statusText: orderInfo.status || liveData.statusLabel || "Sedang Dikerjakan",
+          estimateDate:
+            orderInfo.dueDate ||
+            (orderInfo.deadline
+              ? new Date(orderInfo.deadline).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "Sesuai Jadwal"),
+          daysRemaining:
+            orderInfo.status === "READY" ||
+            orderInfo.status === "Siap Diambil" ||
+            orderInfo.status === "Selesai"
+              ? "Siap Diambil"
+              : "Sedang Dikerjakan",
+          tailorPhone: liveData.business?.whatsapp || orderInfo.phone || "6281234567890",
+          details:
+            [
+              orderInfo.notes,
+              orderInfo.measurements ? `Ukuran: ${orderInfo.measurements}` : "",
+            ]
+              .filter(Boolean)
+              .join(" • ") || "Pesanan aktif dalam antrean pengerjaan bengkel jahit.",
+          priceTotal: `Rp ${totalAmount.toLocaleString("id-ID")}`,
+          dpAmount: dpText,
+          stepHistory:
+            Object.keys(stepHistory).length > 0
+              ? stepHistory
+              : {
+                  0: {
+                    date: orderInfo.createdAt
+                      ? new Date(orderInfo.createdAt).toLocaleDateString("id-ID")
+                      : "Pesanan Masuk",
+                    note: "Pesanan terdaftar di sistem bengkel jahit.",
+                  },
+                  [currentStep]: {
+                    date: "Status saat ini",
+                    note: `Status pengerjaan: ${orderInfo.status}`,
+                  },
+                },
+        };
+
         setOrderData(result);
         setSearchState("success");
-      } else {
-        setOrderData(null);
-        setSearchState("error");
+        return;
       }
-    }, 450);
+    } catch {
+      // Backend order not found or network offline, fallback to local/dummy
+    }
+
+    // 2. Cek dari DUMMY_ORDERS
+    let result = DUMMY_ORDERS[cleanCode];
+
+    // 3. Jika tidak ada di dummy, cek di data pesanan lokal (localStorage)
+    if (!result && typeof window !== "undefined") {
+      try {
+        const localStr = localStorage.getItem("jahitflow_orders");
+        if (localStr) {
+          const list = JSON.parse(localStr);
+          const found = list.find((o: any) => (o.code || "").toUpperCase() === cleanCode);
+          if (found) {
+            const stepMap: Record<string, number> = {
+              "Belum Dikerjakan": 0,
+              "Dipotong": 2,
+              "Dijahit": 3,
+              "Siap Diambil": 5,
+              "Selesai": 5,
+            };
+            const stepNum = stepMap[found.status] ?? 3;
+            result = {
+              id: found.code,
+              customerName: found.customerName,
+              itemType: found.itemName,
+              currentStep: stepNum,
+              statusText: found.status,
+              estimateDate: found.dueDate || "Sesuai Jadwal",
+              daysRemaining: "Sedang Diproses",
+              tailorPhone: found.phone || "6281234567890",
+              details: found.notes || "Pesanan aktif dalam antrean pengerjaan bengkel jahit.",
+              priceTotal: `Rp ${(Number(found.price) || 0).toLocaleString("id-ID")}`,
+              dpAmount: `Rp ${(Number(found.paid) || 0).toLocaleString("id-ID")}`,
+              stepHistory: {
+                0: { date: "Pesanan masuk", note: "Pencatatan nota jahitan pelanggan." },
+                [stepNum]: { date: "Status saat ini", note: `Status pengerjaan: ${found.status}` },
+              },
+            };
+          }
+        }
+      } catch {
+        // fallback
+      }
+    }
+
+    if (result) {
+      setOrderData(result);
+      setSearchState("success");
+    } else {
+      setOrderData(null);
+      setSearchState("error");
+    }
   }, []);
 
   // Otomatis baca parameter URL ?code=... atau ?id=... saat halaman dimuat

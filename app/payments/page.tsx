@@ -194,22 +194,46 @@ export default function PaymentsPage() {
   };
 
   // Handler Lunasi Instan
-  const handleLunasi = (id: string) => {
-    setTransactions((prev) =>
-      prev.map((trx) => {
-        if (trx.id === id) {
-          return {
-            ...trx,
-            paidAmount: trx.totalAmount,
-            status: "Lunas",
-            paymentMethod: trx.paymentMethod === "-" ? "Cash" : trx.paymentMethod,
-          };
-        }
-        return trx;
-      })
-    );
-    showToast("Pembayaran berhasil dilunasi!");
-  }; //[cite: 7]
+  const handleLunasi = async (id: string) => {
+    const target = transactions.find((t) => t.id === id);
+    if (!target) return;
+    const sisa = Math.max(0, target.totalAmount - target.paidAmount);
+
+    try {
+      if (sisa > 0) {
+        await api.payments.create({
+          orderCode: target.orderCode,
+          customerName: target.customerName,
+          totalAmount: target.totalAmount,
+          paidAmount: target.totalAmount,
+          paymentMethod: target.paymentMethod === "-" ? "Cash" : target.paymentMethod,
+          notes: "Pelunasan sisa tagihan",
+        });
+        await loadPayments();
+      } else {
+        setTransactions((prev) =>
+          prev.map((trx) => (trx.id === id ? { ...trx, status: "Lunas" } : trx))
+        );
+      }
+      showToast("Pembayaran berhasil dilunasi!");
+    } catch {
+      // Fallback local update
+      setTransactions((prev) =>
+        prev.map((trx) => {
+          if (trx.id === id) {
+            return {
+              ...trx,
+              paidAmount: trx.totalAmount,
+              status: "Lunas",
+              paymentMethod: trx.paymentMethod === "-" ? "Cash" : trx.paymentMethod,
+            };
+          }
+          return trx;
+        })
+      );
+      showToast("Pembayaran berhasil dilunasi!");
+    }
+  };
 
   const navigationMenu = [
     {

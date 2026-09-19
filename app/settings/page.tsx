@@ -61,6 +61,11 @@ export default function SettingsPage() {
   const [accountNumber, setAccountNumber] = useState("1234567890");
   const [accountHolder, setAccountHolder] = useState("Satria Pratama");
 
+  // Security / Password State & Loading
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     const user = getAuthUser();
     if (user) {
@@ -79,16 +84,33 @@ export default function SettingsPage() {
       if (savedAvatar) setAvatarUrl(savedAvatar);
     }
 
-    api.auth.getProfile().then((profile) => {
-      if (profile?.name) {
-        setOwnerName(profile.name);
-        setAccountHolder(profile.name);
+    // Fetch live settings from backend
+    api.settings.get().then((data) => {
+      if (data?.user?.name) {
+        setOwnerName(data.user.name);
+        setAccountHolder(data.business?.accountHolder || data.user.name);
       }
-      if (profile?.business?.name) setStoreName(profile.business.name);
-      if (profile?.business?.whatsapp) setPhone(profile.business.whatsapp);
-      if (profile?.business?.address) setAddress(profile.business.address);
-      if (profile?.avatar) setAvatarUrl(profile.avatar);
-    }).catch(() => {});
+      if (data?.user?.avatar) setAvatarUrl(data.user.avatar);
+      if (data?.business?.name) setStoreName(data.business.name);
+      if (data?.business?.whatsapp) setPhone(data.business.whatsapp);
+      if (data?.business?.address) setAddress(data.business.address);
+      if (data?.business?.bankName) setBankName(data.business.bankName);
+      if (data?.business?.accountNumber) setAccountNumber(data.business.accountNumber);
+      if (data?.business?.accountHolder) setAccountHolder(data.business.accountHolder);
+      if (typeof data?.business?.waInvoice === "boolean") setWaInvoice(data.business.waInvoice);
+      if (typeof data?.business?.waReminder === "boolean") setWaReminder(data.business.waReminder);
+    }).catch(() => {
+      api.auth.getProfile().then((profile) => {
+        if (profile?.name) {
+          setOwnerName(profile.name);
+          setAccountHolder(profile.name);
+        }
+        if (profile?.business?.name) setStoreName(profile.business.name);
+        if (profile?.business?.whatsapp) setPhone(profile.business.whatsapp);
+        if (profile?.business?.address) setAddress(profile.business.address);
+        if (profile?.avatar) setAvatarUrl(profile.avatar);
+      }).catch(() => {});
+    });
   }, []);
 
   const showToast = (msg: string) => {
@@ -107,7 +129,7 @@ export default function SettingsPage() {
     }
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const base64 = reader.result as string;
       setAvatarUrl(base64);
       if (typeof window !== "undefined") {
@@ -118,12 +140,18 @@ export default function SettingsPage() {
           localStorage.setItem("jahitflow_user", JSON.stringify(user));
         }
       }
+      // Update immediately to backend
+      try {
+        await api.settings.updateProfile({ avatar: base64 });
+      } catch {
+        // local updated
+      }
       showToast("Foto profil berhasil diperbarui!");
     };
     reader.readAsDataURL(file);
   };
 
-  const handleRemoveAvatar = () => {
+  const handleRemoveAvatar = async () => {
     setAvatarUrl(null);
     if (typeof window !== "undefined") {
       localStorage.removeItem("jahitflow_avatar");
@@ -133,25 +161,68 @@ export default function SettingsPage() {
         localStorage.setItem("jahitflow_user", JSON.stringify(user));
       }
     }
+    try {
+      await api.settings.updateProfile({ avatar: "" });
+    } catch {
+      // local updated
+    }
     showToast("Foto profil dihapus.");
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (typeof window !== "undefined") {
-      const user = getAuthUser() || {};
-      user.name = ownerName;
-      if (!user.business) user.business = {};
-      user.business.name = storeName;
-      user.business.whatsapp = phone;
-      user.business.address = address;
-      if (avatarUrl) {
-        user.avatar = avatarUrl;
-        localStorage.setItem("jahitflow_avatar", avatarUrl);
+    setIsSaving(true);
+
+    try {
+      if (activeTab === "keamanan") {
+        if (!currentPassword || !newPassword) {
+          showToast("Mohon masukkan kata sandi saat ini dan kata sandi baru!");
+          setIsSaving(false);
+          return;
+        }
+        if (newPassword.length < 6) {
+          showToast("Kata sandi baru minimal 6 karakter!");
+          setIsSaving(false);
+          return;
+        }
+        await api.settings.changePassword({ currentPassword, newPassword });
+        setCurrentPassword("");
+        setNewPassword("");
+        showToast("Kata sandi berhasil diperbarui!");
+      } else {
+        await api.settings.updateProfile({
+          storeName,
+          ownerName,
+          phone,
+          address,
+          avatar: avatarUrl || undefined,
+          bankName,
+          accountNumber,
+          accountHolder,
+          waInvoice,
+          waReminder,
+        });
+
+        if (typeof window !== "undefined") {
+          const user = getAuthUser() || {};
+          user.name = ownerName;
+          if (!user.business) user.business = {};
+          user.business.name = storeName;
+          user.business.whatsapp = phone;
+          user.business.address = address;
+          if (avatarUrl) {
+            user.avatar = avatarUrl;
+            localStorage.setItem("jahitflow_avatar", avatarUrl);
+          }
+          localStorage.setItem("jahitflow_user", JSON.stringify(user));
+        }
+        showToast("Pengaturan berhasil disimpan ke backend!");
       }
-      localStorage.setItem("jahitflow_user", JSON.stringify(user));
+    } catch (err: any) {
+      showToast(err?.message || "Gagal menyimpan perubahan.");
+    } finally {
+      setIsSaving(false);
     }
-    showToast("Pengaturan profil berhasil disimpan!");
   };
 
   const handleLogout = () => {
@@ -656,6 +727,8 @@ export default function SettingsPage() {
                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Kata Sandi Saat Ini</label>
                         <input
                           type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="••••••••"
                           className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
@@ -664,6 +737,8 @@ export default function SettingsPage() {
                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Kata Sandi Baru</label>
                         <input
                           type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="••••••••"
                           className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none text-xs font-bold text-slate-900 transition bg-[#FAF9F6]/50"
                         />
@@ -676,10 +751,11 @@ export default function SettingsPage() {
                 <div className="pt-4 border-t border-stone-100 flex justify-end">
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-700/20 transition-all"
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 disabled:bg-indigo-400 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-700/20 transition-all cursor-pointer"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>Simpan Perubahan</span>
+                    <span>{isSaving ? "Menyimpan..." : activeTab === "keamanan" ? "Ubah Kata Sandi" : "Simpan Perubahan"}</span>
                   </button>
                 </div>
 

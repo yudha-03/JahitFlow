@@ -119,6 +119,8 @@ export const api = {
       }),
     delete: (id: string) =>
       apiFetch(`/orders/${id}`, { method: "DELETE" }),
+    track: (code: string) =>
+      apiFetch(`/orders/track/${encodeURIComponent(code.trim())}`),
   },
 
   // Payments
@@ -142,6 +144,15 @@ export const api = {
   reports: {
     getAnalytics: (period?: string) =>
       apiFetch(`/reports/analytics${period ? `?period=${encodeURIComponent(period)}` : ""}`),
+  },
+
+  // Settings & Profile
+  settings: {
+    get: () => apiFetch("/settings"),
+    updateProfile: (body: any) =>
+      apiFetch("/settings/profile", { method: "PATCH", body: JSON.stringify(body) }),
+    changePassword: (body: any) =>
+      apiFetch("/settings/password", { method: "PATCH", body: JSON.stringify(body) }),
   },
 
   // Dashboard
