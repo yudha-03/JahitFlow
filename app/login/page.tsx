@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:3001/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +90,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err);
       setErrors({
-        general: "Gagal terhubung ke server backend (port 3001). Pastikan backend sedang berjalan.",
+        general: "Gagal terhubung ke server API. Pastikan server backend sedang aktif.",
       });
       setIsLoading(false);
     }

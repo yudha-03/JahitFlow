@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -482,7 +483,7 @@ const BusinessStep = ({
 
     try {
       setIsSubmitting(true);
-      const res = await fetch("http://localhost:3001/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -516,7 +517,7 @@ const BusinessStep = ({
       onNext();
     } catch (err) {
       console.error(err);
-      setServerError("Tidak dapat terhubung ke server backend (port 3001). Pastikan backend sedang berjalan.");
+      setServerError("Tidak dapat terhubung ke server API. Pastikan server backend sedang aktif.");
       setIsSubmitting(false);
     }
   };

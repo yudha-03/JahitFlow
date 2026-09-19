@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, getAuthUser } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -97,11 +97,15 @@ export default function CustomersPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // User Profile State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
   const loadCustomers = async () => {
     try {
       setIsLoading(true);
       const data = await api.customers.getAll();
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Gagal memuat data pelanggan:", err);
     } finally {
@@ -110,19 +114,28 @@ export default function CustomersPage() {
   };
 
   useEffect(() => {
+    const user = getAuthUser();
+    if (user) {
+      setCurrentUser(user);
+      if (user.avatar) setUserAvatar(user.avatar);
+    }
+    if (typeof window !== "undefined") {
+      const savedAvatar = localStorage.getItem("jahitflow_avatar");
+      if (savedAvatar) setUserAvatar(savedAvatar);
+    }
     loadCustomers();
   }, []);
 
-  // Filter Pelanggan
+  // Filter Pelanggan (Aman dari properti undefined)
   const filteredCustomers = customers.filter(
     (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.phone.includes(searchQuery) ||
-      c.address.toLowerCase().includes(searchQuery.toLowerCase())
+      (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.phone || "").includes(searchQuery) ||
+      (c.address || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Menghitung pelanggan setia (misal: order lebih dari 1)
-  const loyalCustomersCount = customers.filter(c => c.totalOrders > 1).length;
+  const loyalCustomersCount = customers.filter(c => (c.totalOrders || 0) > 1).length;
 
   const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -296,15 +309,19 @@ export default function CustomersPage() {
           <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
-                  S
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                    Satria
+                    {currentUser?.name ? currentUser.name.split(" ")[0] : "Satria"}
                   </p>
                   <p className="text-[10px] text-slate-400 font-medium truncate">
-                    Pemilik Usaha
+                    {currentUser?.business?.businessType || "Pemilik Usaha"}
                   </p>
                 </div>
               </div>
@@ -362,10 +379,16 @@ export default function CustomersPage() {
             <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
-                S
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs overflow-hidden">
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                )}
               </div>
-              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
+                {currentUser?.business?.name || "Satria Tailor"}
+              </span>
             </div>
           </div>
         </motion.header>
@@ -485,11 +508,11 @@ export default function CustomersPage() {
                       </p>
                       <p className="flex items-center gap-2">
                         <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate text-slate-800">{cust.address}</span>
+                        <span className="truncate text-slate-800">{cust.address || "Alamat belum diatur"}</span>
                       </p>
                       <p className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="text-slate-800">Diukur: {cust.lastMeasurementDate}</span>
+                        <span className="text-slate-800">Diukur: {cust.lastMeasurementDate || "-"}</span>
                       </p>
                     </div>
                   </div>

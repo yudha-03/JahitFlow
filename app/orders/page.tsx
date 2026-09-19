@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, getAuthUser } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -34,7 +34,9 @@ import {
   Sparkles,
   Receipt,
   Phone,
-  ArrowRight
+  ArrowRight,
+  ExternalLink,
+  Copy
 } from "lucide-react";
 
 // ============================================================================
@@ -100,8 +102,9 @@ const getStatusBadge = (status: OrderStatus) => {
   }
 };
 
-const formatRupiah = (angka: number) => {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
+const formatRupiah = (angka?: number | null) => {
+  const val = Number(angka) || 0;
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
 };
 
 // ============================================================================
@@ -145,11 +148,15 @@ export default function OrdersPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // User Profile State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
   const loadOrders = async () => {
     try {
       setIsLoading(true);
       const data = await api.orders.getAll();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Gagal memuat pesanan:", err);
     } finally {
@@ -158,6 +165,15 @@ export default function OrdersPage() {
   };
 
   useEffect(() => {
+    const user = getAuthUser();
+    if (user) {
+      setCurrentUser(user);
+      if (user.avatar) setUserAvatar(user.avatar);
+    }
+    if (typeof window !== "undefined") {
+      const savedAvatar = localStorage.getItem("jahitflow_avatar");
+      if (savedAvatar) setUserAvatar(savedAvatar);
+    }
     loadOrders();
   }, []);
 
@@ -379,15 +395,19 @@ export default function OrdersPage() {
           <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
-                  S
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                    Satria
+                    {currentUser?.name ? currentUser.name.split(" ")[0] : "Satria"}
                   </p>
                   <p className="text-[10px] text-slate-400 font-medium truncate">
-                    Pemilik Usaha
+                    {currentUser?.business?.businessType || "Pemilik Usaha"}
                   </p>
                 </div>
               </div>
@@ -454,10 +474,16 @@ export default function OrdersPage() {
             />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
-                S
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs overflow-hidden">
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                )}
               </div>
-              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
+                {currentUser?.business?.name || "Satria Tailor"}
+              </span>
             </div>
           </div>
         </motion.header>
@@ -1012,9 +1038,31 @@ export default function OrdersPage() {
                   <div className="flex justify-between font-black text-slate-900 border-t border-stone-200 pt-2 text-sm">
                     <span>Sisa Tagihan:</span>
                     <span className="text-indigo-700">
-                      {formatRupiah(Math.max(0, selectedOrder.price - selectedOrder.paid))}
+                      {formatRupiah(Math.max(0, (Number(selectedOrder.price) || 0) - (Number(selectedOrder.paid) || 0)))}
                     </span>
                   </div>
+                </div>
+
+                {/* Quick Share Links */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {selectedOrder.phone && (
+                    <a
+                      href={`https://wa.me/${selectedOrder.phone.replace(/^0/, "62")}?text=${encodeURIComponent(
+                        `Halo ${selectedOrder.customerName}, ini informasi pesanan jahitan Anda di ${currentUser?.business?.name || "JahitFlow"}:\nKode Nota: ${selectedOrder.code}\nPakaian: ${selectedOrder.itemName}\nStatus: ${selectedOrder.status}\nTarget Ambil: ${selectedOrder.dueDate}\nTotal: ${formatRupiah(selectedOrder.price)}\n\nLacak status jahitan Anda di:\n${typeof window !== "undefined" ? window.location.origin : ""}/tracking?code=${selectedOrder.code}`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" /> Kirim ke WA
+                    </a>
+                  )}
+                  <Link
+                    href={`/tracking?code=${selectedOrder.code}`}
+                    className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Buka Tracking
+                  </Link>
                 </div>
               </div>
               

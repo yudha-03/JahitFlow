@@ -148,7 +148,49 @@ export default function TrackingPage(): React.ReactElement {
     setSearchState("loading");
 
     setTimeout(() => {
-      const result = DUMMY_ORDERS[cleanCode];
+      // 1. Cek dari DUMMY_ORDERS
+      let result = DUMMY_ORDERS[cleanCode];
+
+      // 2. Jika tidak ada di dummy, cek di data pesanan lokal (localStorage)
+      if (!result && typeof window !== "undefined") {
+        try {
+          const localStr = localStorage.getItem("jahitflow_orders");
+          if (localStr) {
+            const list = JSON.parse(localStr);
+            const found = list.find((o: any) => (o.code || "").toUpperCase() === cleanCode);
+            if (found) {
+              const stepMap: Record<string, number> = {
+                "Belum Dikerjakan": 0,
+                "Dipotong": 2,
+                "Dijahit": 3,
+                "Siap Diambil": 5,
+                "Selesai": 5,
+              };
+              const stepNum = stepMap[found.status] ?? 3;
+              result = {
+                id: found.code,
+                customerName: found.customerName,
+                itemType: found.itemName,
+                currentStep: stepNum,
+                statusText: found.status,
+                estimateDate: found.dueDate || "Sesuai Jadwal",
+                daysRemaining: "Sedang Diproses",
+                tailorPhone: found.phone || "6281234567890",
+                details: found.notes || "Pesanan aktif dalam antrean pengerjaan bengkel jahit.",
+                priceTotal: `Rp ${(Number(found.price) || 0).toLocaleString("id-ID")}`,
+                dpAmount: `Rp ${(Number(found.paid) || 0).toLocaleString("id-ID")}`,
+                stepHistory: {
+                  0: { date: "Pesanan masuk", note: "Pencatatan nota jahitan pelanggan." },
+                  [stepNum]: { date: "Status saat ini", note: `Status pengerjaan: ${found.status}` }
+                }
+              };
+            }
+          }
+        } catch {
+          // fallback
+        }
+      }
+
       if (result) {
         setOrderData(result);
         setSearchState("success");
@@ -159,6 +201,18 @@ export default function TrackingPage(): React.ReactElement {
     }, 450);
   }, []);
 
+  // Otomatis baca parameter URL ?code=... atau ?id=... saat halaman dimuat
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const codeFromUrl = params.get("code") || params.get("id");
+      if (codeFromUrl) {
+        setSearchQuery(codeFromUrl.toUpperCase());
+        executeSearch(codeFromUrl);
+      }
+    }
+  }, [executeSearch]);
+
   const handleSearchForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     executeSearch(searchQuery);
@@ -166,7 +220,8 @@ export default function TrackingPage(): React.ReactElement {
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+      const shareUrl = `${window.location.origin}/tracking?code=${encodeURIComponent(orderData?.id || searchQuery)}`;
+      navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

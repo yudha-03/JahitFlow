@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, getAuthUser } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -57,9 +57,10 @@ const INITIAL_TRANSACTIONS: Transaction[] = []; //[cite: 7]
 
 const STATUS_TABS = ["Semua", "Lunas", "DP", "Belum Bayar"]; //[cite: 7]
 
-const formatRupiah = (angka: number) => {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
-}; //[cite: 7]
+const formatRupiah = (angka?: number | null) => {
+  const val = Number(angka) || 0;
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
+};
 
 // Helper Badge Status
 const getStatusBadge = (status: PaymentStatus) => {
@@ -108,11 +109,15 @@ export default function PaymentsPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // User Profile State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
   const loadPayments = async () => {
     try {
       setIsLoading(true);
       const data = await api.payments.getAll();
-      setTransactions(data);
+      setTransactions(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Gagal memuat transaksi pembayaran:", err);
     } finally {
@@ -121,22 +126,31 @@ export default function PaymentsPage() {
   };
 
   useEffect(() => {
+    const user = getAuthUser();
+    if (user) {
+      setCurrentUser(user);
+      if (user.avatar) setUserAvatar(user.avatar);
+    }
+    if (typeof window !== "undefined") {
+      const savedAvatar = localStorage.getItem("jahitflow_avatar");
+      if (savedAvatar) setUserAvatar(savedAvatar);
+    }
     loadPayments();
   }, []);
 
   // Filter & Search Logic
   const filteredTransactions = transactions.filter((trx) => {
     const matchesSearch = 
-      trx.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      trx.orderCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trx.id.toLowerCase().includes(searchQuery.toLowerCase());
+      (trx.customerName || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (trx.orderCode || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (trx.id || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Semua" || trx.status === activeTab;
     return matchesSearch && matchesTab;
   });
 
   // Kalkulasi Statistik
-  const totalPendapatan = transactions.reduce((acc, curr) => acc + curr.paidAmount, 0);
-  const totalPiutang = transactions.reduce((acc, curr) => acc + (curr.totalAmount - curr.paidAmount), 0);
+  const totalPendapatan = transactions.reduce((acc, curr) => acc + (Number(curr.paidAmount) || 0), 0);
+  const totalPiutang = transactions.reduce((acc, curr) => acc + Math.max(0, (Number(curr.totalAmount) || 0) - (Number(curr.paidAmount) || 0)), 0);
   const totalTransaksiLunas = transactions.filter(t => t.status === "Lunas").length;
 
   // Handler Submit Transaksi Baru
@@ -324,15 +338,19 @@ export default function PaymentsPage() {
           <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
-                  S
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                    Satria
+                    {currentUser?.name ? currentUser.name.split(" ")[0] : "Satria"}
                   </p>
                   <p className="text-[10px] text-slate-400 font-medium truncate">
-                    Pemilik Usaha
+                    {currentUser?.business?.businessType || "Pemilik Usaha"}
                   </p>
                 </div>
               </div>
@@ -390,10 +408,16 @@ export default function PaymentsPage() {
             <NotificationBell />
 
             <div className="flex items-center gap-2 pl-1.5 sm:pl-2 border-l border-stone-200 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
-                S
+              <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs overflow-hidden">
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "S"
+                )}
               </div>
-              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">Satria Tailor</span>
+              <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
+                {currentUser?.business?.name || "Satria Tailor"}
+              </span>
             </div>
           </div>
         </motion.header>

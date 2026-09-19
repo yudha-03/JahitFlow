@@ -368,7 +368,7 @@ export default function SettingsPage() {
                 )}
               </div>
               <span className="text-xs font-extrabold text-slate-800 hidden md:inline-block">
-                Satria Tailor
+                {storeName || "Satria Tailor"}
               </span>
             </div>
           </div>

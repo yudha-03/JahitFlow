@@ -208,7 +208,7 @@ export default function NotificationBell({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-stone-200/90 z-50 overflow-hidden text-slate-800"
+            className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-stone-200/90 z-50 overflow-hidden text-slate-800"
           >
             {/* Header Popover */}
             <div className="p-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between gap-3">
