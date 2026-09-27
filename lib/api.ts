@@ -14,6 +14,7 @@ export function getAuthToken(): string | null {
 export function setAuthToken(token: string) {
   if (typeof window !== "undefined") {
     localStorage.setItem("jahitflow_token", token);
+    document.cookie = `jahitflow_token=${encodeURIComponent(token)}; path=/; max-age=604800; SameSite=Lax`;
   }
 }
 
@@ -21,6 +22,7 @@ export function clearAuthSession() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("jahitflow_token");
     localStorage.removeItem("jahitflow_user");
+    document.cookie = "jahitflow_token=; path=/; max-age=0; SameSite=Lax";
   }
 }
 

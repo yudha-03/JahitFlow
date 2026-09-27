@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api, getAuthUser } from "@/lib/api";
+import { api, getAuthUser, clearAuthSession } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -95,6 +95,86 @@ export default function ReportsPage() {
     }
     loadAnalytics(activePeriod);
   }, [activePeriod]);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const rows: string[][] = [
+        ["LAPORAN ANALITIK USAHA JAHIT - JAHITFLOW"],
+        [`Periode Laporan: ${activePeriod}`],
+        [`Tanggal Unduh: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`],
+        [],
+        ["--- RINGKASAN PERFORMA ---"],
+        ["Metrik", "Nilai"],
+        ["Total Pendapatan", `Rp ${Number(analytics?.summary?.totalRevenue || 0).toLocaleString("id-ID")}`],
+        ["Pesanan Selesai", `${analytics?.summary?.completedOrders || 0} Jahitan`],
+        ["Pesanan Aktif", `${analytics?.summary?.activeOrders || 0} Jahitan`],
+        ["Rata-rata Nilai Pesanan", `Rp ${Number(analytics?.summary?.avgOrderValue || 0).toLocaleString("id-ID")}`],
+        ["Total Pelanggan Terdaftar", `${analytics?.summary?.totalCustomers || 0} Orang`],
+        [],
+        ["--- 5 BUSANA TERLARIS ---"],
+        ["Nama Busana / Jenis Pakaian", "Jumlah Jahitan", "Persentase Kontribusi"],
+      ];
+
+      const topItems = analytics?.topItems || [];
+      if (topItems.length > 0) {
+        topItems.forEach((item: any) => {
+          rows.push([item.name || "-", `${item.count || 0} pesanan`, `${item.percentage || 0}%`]);
+        });
+      } else {
+        rows.push(["Belum ada data busana terlaris", "0", "0%"]);
+      }
+
+      rows.push([]);
+      rows.push(["--- RIWAYAT OMZET BULANAN ---"]);
+      rows.push(["Bulan", "Nominal Omzet (Rp)"]);
+
+      const revData = analytics?.revenueData || [];
+      if (revData.length > 0) {
+        revData.forEach((rev: any) => {
+          rows.push([rev.month, `Rp ${Number(rev.amount || 0).toLocaleString("id-ID")}`]);
+        });
+      } else {
+        rows.push(["Belum ada riwayat omzet", "0"]);
+      }
+
+      const csvContent =
+        "\uFEFF" +
+        rows
+          .map((row) =>
+            row
+              .map((field) => `"${String(field).replace(/"/g, '""')}"`)
+              .join(";")
+          )
+          .join("\r\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const safePeriod = activePeriod.toLowerCase().replace(/\s+/g, "_");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Laporan_JahitFlow_${safePeriod}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast("Laporan Excel/CSV berhasil diunduh!");
+    } catch (err: any) {
+      showToast(`Gagal mengekspor laporan: ${err.message}`);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    showToast("Membuka dialog cetak laporan PDF...");
+    setTimeout(() => {
+      window.print();
+    }, 400);
+  };
 
   const navigationMenu = [
     {
@@ -242,7 +322,7 @@ export default function ReportsPage() {
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />
@@ -362,15 +442,19 @@ export default function ReportsPage() {
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button 
-                onClick={() => showToast("Mengekspor laporan ke format Excel...")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-stone-50 text-slate-700 border border-stone-200 rounded-xl text-xs font-bold transition shadow-2xs"
+                type="button"
+                onClick={handleExportExcel}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-stone-50 text-slate-700 border border-stone-200 rounded-xl text-xs font-bold transition shadow-2xs active:scale-95"
+                title="Unduh laporan dalam format CSV/Excel"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Export Excel</span>
               </button>
               <button 
-                onClick={() => showToast("Laporan sedang disiapkan dalam format PDF...")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-700/20 transition"
+                type="button"
+                onClick={handleDownloadPdf}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-700/20 transition active:scale-95"
+                title="Cetak atau Simpan Laporan sebagai PDF"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Unduh PDF</span>

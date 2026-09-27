@@ -22,7 +22,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, setAuthToken } from "@/lib/api";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -509,7 +509,7 @@ const BusinessStep = ({
 
       // Simpan session autentikasi di browser
       if (typeof window !== "undefined") {
-        localStorage.setItem("jahitflow_token", data.accessToken);
+        setAuthToken(data.accessToken);
         localStorage.setItem("jahitflow_user", JSON.stringify(data.user));
       }
 

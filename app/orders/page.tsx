@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api, getAuthUser } from "@/lib/api";
+import { api, getAuthUser, clearAuthSession } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -36,8 +36,11 @@ import {
   Phone,
   ArrowRight,
   ExternalLink,
-  Copy
+  Copy,
+  Printer
 } from "lucide-react";
+import InvoiceSuccessModal from "@/components/InvoiceSuccessModal";
+import { openWhatsAppInvoice, openWhatsAppPickupReminder } from "@/lib/whatsapp";
 
 // ============================================================================
 // TYPES & INITIAL STATE (ZERO DUMMY DATA)
@@ -125,6 +128,7 @@ export default function OrdersPage() {
   
   // States Modals
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
+  const [createdInvoiceSuccess, setCreatedInvoiceSuccess] = useState<any | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
@@ -177,6 +181,11 @@ export default function OrdersPage() {
     loadOrders();
   }, []);
 
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
+  };
+
   // Logika Filter (Tab & Search Query)
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = 
@@ -212,6 +221,9 @@ export default function OrdersPage() {
       await loadOrders();
       setIsNewOrderModalOpen(false);
       setOrderForm({ customerName: "", phone: "", itemName: "", dueDate: "", price: "", paid: "" });
+      if (currentUser?.business?.waInvoice !== false) {
+        setCreatedInvoiceSuccess(created);
+      }
       showToast(`Pesanan ${created.code} berhasil disimpan ke database!`);
     } catch (err: any) {
       showToast(`Gagal membuat pesanan: ${err.message}`);
@@ -414,7 +426,7 @@ export default function OrdersPage() {
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />
@@ -630,6 +642,17 @@ export default function OrdersPage() {
                           {/* Aksi Cepat */}
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-1.5">
+                              {/* Kirim Nota via WhatsApp */}
+                              {order.phone && (
+                                <button
+                                  type="button"
+                                  onClick={() => openWhatsAppInvoice(order, currentUser?.business)}
+                                  className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors border border-transparent hover:border-emerald-100"
+                                  title="Kirim Nota via WhatsApp"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </button>
+                              )}
                               {/* Lihat Detail */}
                               <button
                                 type="button"
@@ -750,7 +773,18 @@ export default function OrdersPage() {
                         <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Belum Bayar</span>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-1.5">
+                      {order.phone && (
+                        <button
+                          type="button"
+                          onClick={() => openWhatsAppInvoice(order, currentUser?.business)}
+                          className="px-2.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition flex items-center gap-1 active:scale-95"
+                          title="Kirim Nota via WA"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>WA</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleOpenView(order)}
@@ -1043,25 +1077,41 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
-                {/* Quick Share Links */}
+                {/* Quick Share Links & Actions */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {selectedOrder.phone && (
-                    <a
-                      href={`https://wa.me/${selectedOrder.phone.replace(/^0/, "62")}?text=${encodeURIComponent(
-                        `Halo ${selectedOrder.customerName}, ini informasi pesanan jahitan Anda di ${currentUser?.business?.name || "JahitFlow"}:\nKode Nota: ${selectedOrder.code}\nPakaian: ${selectedOrder.itemName}\nStatus: ${selectedOrder.status}\nTarget Ambil: ${selectedOrder.dueDate}\nTotal: ${formatRupiah(selectedOrder.price)}\n\nLacak status jahitan Anda di:\n${typeof window !== "undefined" ? window.location.origin : ""}/tracking?code=${selectedOrder.code}`
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition"
+                    <button
+                      type="button"
+                      onClick={() => openWhatsAppInvoice(selectedOrder, currentUser?.business)}
+                      className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs active:scale-95"
                     >
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" /> Kirim ke WA
-                    </a>
+                      <Phone className="w-3.5 h-3.5 fill-white" /> Kirim Nota via WA
+                    </button>
                   )}
+                  {selectedOrder.status === "Siap Diambil" && selectedOrder.phone && (
+                    <button
+                      type="button"
+                      onClick={() => openWhatsAppPickupReminder(selectedOrder, currentUser?.business)}
+                      className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-xs active:scale-95"
+                    >
+                      <Phone className="w-3.5 h-3.5 fill-white" /> Info Siap Ambil via WA
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-slate-700 border border-stone-200 rounded-xl text-xs font-bold transition shadow-2xs active:scale-95"
+                  >
+                    <Printer className="w-3.5 h-3.5" /> Cetak Nota
+                  </button>
                   <Link
                     href={`/tracking?code=${selectedOrder.code}`}
-                    className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition"
+                    target="_blank"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" /> Buka Tracking
+                    <ExternalLink className="w-3.5 h-3.5" /> Lacak Online
                   </Link>
                 </div>
               </div>
@@ -1243,6 +1293,20 @@ export default function OrdersPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* POPUP NOTA SUKSES & KIRIM WHATSAPP */}
+      <InvoiceSuccessModal
+        order={createdInvoiceSuccess}
+        storeInfo={currentUser?.business}
+        onClose={() => setCreatedInvoiceSuccess(null)}
+        onViewReceipt={(ord) => {
+          setCreatedInvoiceSuccess(null);
+          const fullOrder = orders.find((o) => o.code === ord.code);
+          if (fullOrder) {
+            handleOpenView(fullOrder);
+          }
+        }}
+      />
 
     </div>
   );

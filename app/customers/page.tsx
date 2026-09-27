@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api, getAuthUser } from "@/lib/api";
+import { api, getAuthUser, clearAuthSession } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -77,9 +77,25 @@ export default function CustomersPage() {
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
 
-  // Form State untuk Tambah/Edit Pelanggan
+  // Form State untuk Tambah Pelanggan
   const [customerForm, setCustomerForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    lingkarDada: "",
+    lingkarPinggang: "",
+    lebarBahu: "",
+    panjangBaju: "",
+    panjangLengan: "",
+    panjangCelana: "",
+    lingkarPinggul: "",
+  });
+
+  // Form State untuk Edit Pelanggan
+  const [editCustomerForm, setEditCustomerForm] = useState({
     name: "",
     phone: "",
     address: "",
@@ -126,6 +142,11 @@ export default function CustomersPage() {
     loadCustomers();
   }, []);
 
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
+  };
+
   // Filter Pelanggan (Aman dari properti undefined)
   const filteredCustomers = customers.filter(
     (c) =>
@@ -166,6 +187,52 @@ export default function CustomersPage() {
       showToast(`Pelanggan ${created.name} berhasil disimpan ke database!`);
     } catch (err: any) {
       showToast(`Gagal menyimpan pelanggan: ${err.message}`);
+    }
+  };
+
+  const handleOpenEdit = (cust: Customer) => {
+    setEditingCustomerId(cust.id);
+    setEditCustomerForm({
+      name: cust.name || "",
+      phone: cust.phone || "",
+      address: cust.address === "Belum ada alamat" ? "" : cust.address || "",
+      lingkarDada: cust.measurements?.lingkarDada ? String(cust.measurements.lingkarDada) : "",
+      lingkarPinggang: cust.measurements?.lingkarPinggang ? String(cust.measurements.lingkarPinggang) : "",
+      lebarBahu: cust.measurements?.lebarBahu ? String(cust.measurements.lebarBahu) : "",
+      panjangBaju: cust.measurements?.panjangBaju ? String(cust.measurements.panjangBaju) : "",
+      panjangLengan: cust.measurements?.panjangLengan ? String(cust.measurements.panjangLengan) : "",
+      panjangCelana: cust.measurements?.panjangCelana ? String(cust.measurements.panjangCelana) : "",
+      lingkarPinggul: cust.measurements?.lingkarPinggul ? String(cust.measurements.lingkarPinggul) : "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomerId || !editCustomerForm.name || !editCustomerForm.phone) return;
+
+    try {
+      await api.customers.update(editingCustomerId, {
+        name: editCustomerForm.name.trim(),
+        phone: editCustomerForm.phone.trim(),
+        address: editCustomerForm.address.trim() || undefined,
+        measurements: {
+          lingkarDada: Number(editCustomerForm.lingkarDada) || 0,
+          lingkarPinggang: Number(editCustomerForm.lingkarPinggang) || 0,
+          lebarBahu: Number(editCustomerForm.lebarBahu) || 0,
+          panjangBaju: Number(editCustomerForm.panjangBaju) || 0,
+          panjangLengan: Number(editCustomerForm.panjangLengan) || 0,
+          panjangCelana: Number(editCustomerForm.panjangCelana) || 0,
+          lingkarPinggul: Number(editCustomerForm.lingkarPinggul) || 0,
+        },
+      });
+
+      await loadCustomers();
+      setIsEditModalOpen(false);
+      setEditingCustomerId(null);
+      showToast(`Data pelanggan "${editCustomerForm.name}" berhasil diperbarui!`);
+    } catch (err: any) {
+      showToast(`Gagal memperbarui pelanggan: ${err.message}`);
     }
   };
 
@@ -328,7 +395,7 @@ export default function CustomersPage() {
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />
@@ -518,19 +585,27 @@ export default function CustomersPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-1.5">
                     <button
                       onClick={() => {
                         setSelectedCustomer(cust);
                         setIsDetailModalOpen(true);
                       }}
-                      className="flex-1 py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors border border-amber-200/60"
+                      className="flex-1 py-2 px-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors border border-amber-200/60"
+                      title="Lihat Ukuran"
                     >
-                      <Ruler className="w-3.5 h-3.5 text-amber-600" /> Lihat Ukuran
+                      <Ruler className="w-3.5 h-3.5 text-amber-600" /> Ukuran
+                    </button>
+                    <button
+                      onClick={() => handleOpenEdit(cust)}
+                      className="py-2 px-2.5 bg-stone-100 hover:bg-stone-200 text-slate-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors border border-stone-200"
+                      title="Edit Data & Ukuran"
+                    >
+                      <FileEdit className="w-3.5 h-3.5 text-indigo-600" /> Edit
                     </button>
                     <Link
                       href="/orders"
-                      className="py-2 px-3 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
+                      className="py-2 px-2.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
                     >
                       + Pesanan
                     </Link>
@@ -762,14 +837,168 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              <div className="p-4 bg-[#FAF9F6] border-t border-stone-100 flex justify-end">
+              <div className="p-4 bg-[#FAF9F6] border-t border-stone-100 flex items-center justify-end gap-2">
                 <button
+                  type="button"
+                  onClick={() => {
+                    setIsDetailModalOpen(false);
+                    handleOpenEdit(selectedCustomer);
+                  }}
+                  className="px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                >
+                  <FileEdit className="w-3.5 h-3.5" /> Ubah Ukuran
+                </button>
+                <button
+                  type="button"
                   onClick={() => setIsDetailModalOpen(false)}
-                  className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors"
                 >
                   Tutup
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* =====================================================================
+          MODAL 3: EDIT DATA & UKURAN PELANGGAN
+          ===================================================================== */}
+      <AnimatePresence>
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 z-10 max-h-[90vh] flex flex-col"
+            >
+              <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-700 rounded-xl">
+                    <FileEdit className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-lg">Edit Pelanggan & Ukuran</h3>
+                    <p className="text-xs text-slate-400">Perbarui kontak dan catatan ukuran badan pelanggan</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateCustomer} className="p-6 space-y-6 overflow-y-auto flex-1">
+                <div className="space-y-3">
+                  <h4 className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-4 h-4" /> Informasi Pelanggan
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nama Lengkap <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Budi Santoso"
+                        value={editCustomerForm.name}
+                        onChange={(e) => setEditCustomerForm({ ...editCustomerForm, name: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900 placeholder:text-slate-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nomor WhatsApp <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="081234567890"
+                        value={editCustomerForm.phone}
+                        onChange={(e) => setEditCustomerForm({ ...editCustomerForm, phone: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900 placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Alamat Lengkap</label>
+                    <input
+                      type="text"
+                      placeholder="Jl. Merdeka No. 45"
+                      value={editCustomerForm.address}
+                      onChange={(e) => setEditCustomerForm({ ...editCustomerForm, address: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-slate-900 placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-4 border-t border-slate-100">
+                  <h4 className="text-xs font-extrabold text-amber-600 uppercase tracking-wider flex items-center gap-2">
+                    <Ruler className="w-4 h-4" /> Ukuran Badan (cm)
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "Lingkar Dada", key: "lingkarDada", placeholder: "98" },
+                      { label: "Lingkar Pinggang", key: "lingkarPinggang", placeholder: "88" },
+                      { label: "Lebar Bahu", key: "lebarBahu", placeholder: "44" },
+                      { label: "Panjang Baju", key: "panjangBaju", placeholder: "72" },
+                      { label: "Panjang Lengan", key: "panjangLengan", placeholder: "60" },
+                      { label: "Panjang Celana", key: "panjangCelana", placeholder: "100" },
+                      { label: "Lingkar Pinggul", key: "lingkarPinggul", placeholder: "102" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1 truncate">
+                          {field.label}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder={field.placeholder}
+                            value={editCustomerForm[field.key as keyof typeof editCustomerForm]}
+                            onChange={(e) =>
+                              setEditCustomerForm({
+                                ...editCustomerForm,
+                                [field.key]: e.target.value,
+                              })
+                            }
+                            className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none text-sm font-bold text-slate-900"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-xs text-slate-400 font-semibold pointer-events-none">
+                            cm
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold shadow-md shadow-indigo-700/20 transition-all active:scale-95"
+                  >
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

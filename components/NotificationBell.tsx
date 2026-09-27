@@ -10,10 +10,8 @@ import {
   Scissors,
   CheckCircle2,
   X,
-  ExternalLink,
   Phone,
-  ChevronRight,
-  CircleAlert
+  ChevronRight
 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -115,9 +113,7 @@ export default function NotificationBell({
   };
 
   useEffect(() => {
-    if (propOrders) {
-      setInternalOrders(propOrders);
-    } else {
+    if (!propOrders) {
       fetchOrders();
     }
   }, [propOrders]);
@@ -137,10 +133,12 @@ export default function NotificationBell({
     };
   }, [isOpen]);
 
+  const activeOrders = propOrders || internalOrders;
+
   // Filter aturan:
   // 1. Status masih "Belum Dikerjakan" (belum tersentuh sama sekali)
   // 2. Deadline mendekati (H-3 s/d hari H atau sudah lewat)
-  const urgentOrders = internalOrders
+  const urgentOrders = activeOrders
     .filter((order) => {
       if (order.status !== "Belum Dikerjakan") return false;
       const urgency = calculateUrgency(order.dueDate);

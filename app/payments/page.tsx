@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { api, getAuthUser } from "@/lib/api";
+import { api, getAuthUser, clearAuthSession } from "@/lib/api";
 import NotificationBell from "@/components/NotificationBell";
 import {
   Scissors,
@@ -30,8 +30,11 @@ import {
   MoreVertical,
   Check,
   Printer,
-  Home // <-- Tambahan icon Home
-} from "lucide-react"; //[cite: 7]
+  Home,
+  Trash2,
+  Phone
+} from "lucide-react";
+import { openWhatsAppReceipt } from "@/lib/whatsapp";
 
 // ============================================================================
 // TYPES & INITIAL DATA
@@ -138,6 +141,11 @@ export default function PaymentsPage() {
     loadPayments();
   }, []);
 
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
+  };
+
   // Filter & Search Logic
   const filteredTransactions = transactions.filter((trx) => {
     const matchesSearch = 
@@ -232,6 +240,19 @@ export default function PaymentsPage() {
         })
       );
       showToast("Pembayaran berhasil dilunasi!");
+    }
+  };
+
+  const handleDeletePayment = async (id: string, orderCode: string) => {
+    if (window.confirm(`Hapus catatan transaksi untuk pesanan ${orderCode}?`)) {
+      try {
+        await api.payments.delete(id);
+        await loadPayments();
+        showToast("Catatan transaksi berhasil dihapus dari database!");
+      } catch (err: any) {
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
+        showToast(`Catatan transaksi dihapus (${err.message || "Lokal"})`);
+      }
     }
   };
 
@@ -381,7 +402,7 @@ export default function PaymentsPage() {
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />
@@ -596,6 +617,13 @@ export default function PaymentsPage() {
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
+                              <button 
+                                onClick={() => handleDeletePayment(trx.id, trx.orderCode)}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" 
+                                title="Hapus Transaksi"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -654,7 +682,7 @@ export default function PaymentsPage() {
                         <p className="text-[10px] font-bold text-rose-600 mt-2 text-right">Sisa: {formatRupiah(sisaTagihan)}</p>
                       )}
                     </div>
-                    <div className="pt-3 flex gap-2 border-t border-stone-100">
+                    <div className="pt-3 flex items-center gap-2 border-t border-stone-100">
                       <button 
                         onClick={() => setSelectedReceipt(trx)}
                         className="flex-1 py-2 text-center text-[10px] font-bold text-slate-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"
@@ -669,6 +697,13 @@ export default function PaymentsPage() {
                           Lunasi
                         </button>
                       )}
+                      <button 
+                        onClick={() => handleDeletePayment(trx.id, trx.orderCode)}
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                        title="Hapus Transaksi"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </motion.div>
                 );
@@ -906,10 +941,18 @@ export default function PaymentsPage() {
 
               <div className="p-4 bg-[#FAF9F6] border-t border-stone-100 flex gap-2">
                 <button 
-                  onClick={() => { setSelectedReceipt(null); showToast("Mencetak kwitansi..."); }}
-                  className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  onClick={() => openWhatsAppReceipt(selectedReceipt, currentUser?.business)}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
+                  title="Kirim bukti kwitansi ke WhatsApp pelanggan"
                 >
-                  <Printer className="w-4 h-4" /> Cetak Kwitansi
+                  <Phone className="w-4 h-4 fill-white" /> Kirim Kwitansi WA
+                </button>
+                <button 
+                  onClick={() => { window.print(); }}
+                  className="py-2.5 px-4 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
+                  title="Cetak kwitansi"
+                >
+                  <Printer className="w-4 h-4" /> Cetak
                 </button>
               </div>
             </motion.div>

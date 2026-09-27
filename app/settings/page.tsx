@@ -191,8 +191,10 @@ export default function SettingsPage() {
         showToast("Kata sandi berhasil diperbarui!");
       } else {
         await api.settings.updateProfile({
-          storeName,
+          name: ownerName,
           ownerName,
+          storeName,
+          whatsapp: phone,
           phone,
           address,
           avatar: avatarUrl || undefined,
@@ -641,8 +643,8 @@ export default function SettingsPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-2xl border border-stone-200/80 gap-3">
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900">Kirim Nota Otomatis via WA</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Pelanggan akan menerima bukti nota/DP langsung ke WA setelah transaksi dicatat.</p>
+                          <p className="text-xs font-bold text-slate-900">Pop-up Nota WhatsApp Pasca-Pesanan</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Otomatis menampilkan jendela nota digital & tombol kirim WA langsung setelah pesanan baru disimpan.</p>
                         </div>
                         <input
                           type="checkbox"
@@ -654,8 +656,8 @@ export default function SettingsPage() {
 
                       <div className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-2xl border border-stone-200/80 gap-3">
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900">Pengingat Jahitan Selesai</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Kirim pesan pemberitahuan otomatis saat status pesanan diubah menjadi "Siap Diambil".</p>
+                          <p className="text-xs font-bold text-slate-900">Tombol Cepat Notifikasi Siap Ambil</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Menyediakan tombol kirim pesan pemberitahuan ramah di rincian pesanan saat pakaian siap diambil.</p>
                         </div>
                         <input
                           type="checkbox"
