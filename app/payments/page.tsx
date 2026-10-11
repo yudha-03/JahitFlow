@@ -213,7 +213,7 @@ export default function PaymentsPage() {
           orderCode: target.orderCode,
           customerName: target.customerName,
           totalAmount: target.totalAmount,
-          paidAmount: target.totalAmount,
+          paidAmount: sisa,
           paymentMethod: target.paymentMethod === "-" ? "Cash" : target.paymentMethod,
           notes: "Pelunasan sisa tagihan",
         });
@@ -637,7 +637,7 @@ export default function PaymentsPage() {
                             <CreditCard size={28} />
                           </div>
                           <p className="font-extrabold text-sm text-slate-900 mb-1">Belum Ada Data Pembayaran</p>
-                          <p className="text-xs text-slate-500 font-medium">Silakan catat pembayaran baru dengan tombol "Catat Bayar" di atas.</p>
+                          <p className="text-xs text-slate-500 font-medium">Silakan catat pembayaran baru dengan tombol &quot;Catat Bayar&quot; di atas.</p>
                         </div>
                       </td>
                     </tr>
@@ -935,7 +935,7 @@ export default function PaymentsPage() {
                 </div>
 
                 {selectedReceipt.notes && (
-                  <p className="text-[11px] text-slate-500 italic text-center">"{selectedReceipt.notes}"</p>
+                  <p className="text-[11px] text-slate-500 italic text-center">&quot;{selectedReceipt.notes}&quot;</p>
                 )}
               </div>
 

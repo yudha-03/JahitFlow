@@ -624,7 +624,7 @@ export default function CustomersPage() {
                   </div>
                   <p className="font-extrabold text-sm text-slate-900 mb-1">Belum Ada Data Pelanggan</p>
                   <p className="text-xs text-slate-500 font-medium max-w-sm mx-auto">
-                    Mulai tambahkan pelanggan pertama Anda dengan klik tombol "Tambah Pelanggan" di atas.
+                    Mulai tambahkan pelanggan pertama Anda dengan klik tombol &quot;Tambah Pelanggan&quot; di atas.
                   </p>
                 </motion.div>
               </div>

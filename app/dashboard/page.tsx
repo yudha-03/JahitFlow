@@ -243,7 +243,7 @@ export default function DashboardPage() {
       setIsSubmitting(true);
       const newOrder = await api.orders.create({
         customerName: orderForm.customerName,
-        phone: orderForm.phone || "0812" + Math.floor(10000000 + Math.random() * 90000000),
+        phone: orderForm.phone.trim() || "-",
         itemName: orderForm.itemName,
         dueDate: orderForm.dueDate || "Belum diatur",
         price: Number(orderForm.totalPrice) || 0,

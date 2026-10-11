@@ -11,9 +11,10 @@ import {
   CheckCircle2,
   X,
   Phone,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { formatPhoneNumber } from "@/lib/whatsapp";
 
 export interface OrderAlertItem {
   id?: string;
@@ -96,26 +97,25 @@ export default function NotificationBell({
 }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [internalOrders, setInternalOrders] = useState<OrderAlertItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Jika tidak ada propOrders yang di-pass, fetch otomatis dari API
-  const fetchOrders = async () => {
-    try {
-      setIsLoading(true);
-      const data = await api.orders.getAll();
-      setInternalOrders(data || []);
-    } catch (err) {
-      console.error("NotificationBell: Gagal memuat pesanan", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let isMounted = true;
     if (!propOrders) {
-      fetchOrders();
+      api.orders.getAll()
+        .then((data) => {
+          if (isMounted && data) {
+            setInternalOrders(data);
+          }
+        })
+        .catch((err) => {
+          console.error("NotificationBell: Gagal memuat pesanan", err);
+        });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [propOrders]);
 
   // Handle click outside untuk menutup popover
@@ -303,9 +303,9 @@ export default function NotificationBell({
 
                     {/* Tombol Aksi Cepat */}
                     <div className="pt-1.5 flex items-center justify-between gap-2 border-t border-stone-100 text-xs">
-                      {order.phone ? (
+                      {formatPhoneNumber(order.phone) ? (
                         <a
-                          href={`https://wa.me/${order.phone.replace(/^0/, "62")}`}
+                          href={`https://wa.me/${formatPhoneNumber(order.phone)}`}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/70 px-2.5 py-1 rounded-xl border border-emerald-200 transition"

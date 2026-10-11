@@ -14,6 +14,7 @@ import {
   X,
   LogOut,
 } from "lucide-react";
+import { getAuthUser, clearAuthSession } from "@/lib/api";
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -47,6 +48,19 @@ export const navigationMenu = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [currentUser, setCurrentUser] = React.useState<{ name?: string; role?: string; avatar?: string } | null>(null);
+
+  React.useEffect(() => {
+    const user = getAuthUser();
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push("/login");
+  };
 
   return (
     <>
@@ -134,22 +148,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="p-4 border-t border-stone-100 bg-[#FAF9F6]">
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0">
-                  S
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shrink-0 uppercase">
+                  {currentUser?.name ? currentUser.name.charAt(0) : "S"}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                    Satria
+                    {currentUser?.name || "Satria"}
                   </p>
                   <p className="text-[10px] text-slate-400 font-medium truncate">
-                    Pemilik Usaha
+                    {currentUser?.role || "Pemilik Usaha"}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 title="Keluar"
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
               >
                 <LogOut className="w-4 h-4" />

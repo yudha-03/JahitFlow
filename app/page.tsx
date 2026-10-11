@@ -184,7 +184,7 @@ export default function RedesignedLandingPage() {
 
             {/* Supporting Quote */}
             <p className="text-xs text-stone-500 pt-1 italic max-w-md mx-auto">
-              "Dirancang untuk usaha jahit yang ingin mulai beralih dari pencatatan manual ke pengelolaan digital."
+              &quot;Dirancang untuk usaha jahit yang ingin mulai beralih dari pencatatan manual ke pengelolaan digital.&quot;
             </p>
           </div>
 
@@ -1309,7 +1309,7 @@ export default function RedesignedLandingPage() {
                 Pelanggan Bisa Mengecek Pesanannya Sendiri
               </h2>
               <p className="text-slate-600 text-sm leading-relaxed">
-                Pelanggan tidak perlu berulang kali mengirim WhatsApp hanya untuk bertanya <em>"Baju saya sudah selesai belum?"</em>. Cukup beri nomor pesanan, dan mereka bisa mengecek sendiri status pengerjaannya.
+                Pelanggan tidak perlu berulang kali mengirim WhatsApp hanya untuk bertanya <em>&quot;Baju saya sudah selesai belum?&quot;</em>. Cukup beri nomor pesanan, dan mereka bisa mengecek sendiri status pengerjaannya.
               </p>
               
               <div className="pt-2">

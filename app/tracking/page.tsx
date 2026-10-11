@@ -520,7 +520,7 @@ export default function TrackingPage(): React.ReactElement {
                     Nomor Nota Tidak Ditemukan
                   </h3>
                   <p className="text-slate-600 text-sm md:text-base leading-relaxed max-w-md mx-auto">
-                    Kode <strong className="font-mono text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">"{searchQuery}"</strong> belum terdaftar di sistem.
+                    Kode <strong className="font-mono text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">&quot;{searchQuery}&quot;</strong> belum terdaftar di sistem.
                   </p>
                   <p className="text-xs text-slate-400 mt-2">
                     Pastikan tidak ada salah ketik atau hubungi penjahit jika nomor nota baru saja dibuat.
